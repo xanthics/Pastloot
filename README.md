@@ -1,2 +1,3 @@
-# Pastloot
-An auto-vendor/destroy addon for 3.3.5 based on passloot 
+Code -> download zip -> Extract
+
+Move the **Pastloot** folder, that is in the same folder as this README, to your addons directory.

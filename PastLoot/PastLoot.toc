@@ -1,0 +1,47 @@
+﻿## Interface: 30300
+## Title: PastLoot
+## Author: Xan.  PassLoot by Odlaw
+## Version: 0.1
+## Notes: Keep, Vendor, Delete ruleslist for inventory management
+## SavedVariables: PastLootDB
+## OptionalDeps: Ace3, LibBabble-Inventory-3.0, LibSink-2.0, LibDataBroker-1.1
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\LibBabble-Inventory-3.0\lib.xml
+Libs\LibBabble-TalentTree-3.0\lib.xml
+Libs\LibSink-2.0\lib.xml
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+#@end-no-lib-strip@
+Locales.xml
+PastLoot.lua
+Constants.lua
+MainGUI.lua
+ModulesGUI.lua
+Modules\Quality.lua
+Modules\Bind.lua
+Modules\Unique.lua
+Modules\Equipslot.lua
+Modules\TypeSubType.lua
+Modules\LearnedItem.lua
+Modules\ItemLevel.lua
+Modules\RequiredLevel.lua
+Modules\ItemName.lua
+Modules\ItemPrice.lua
+Modules\Usable.lua
+Modules\Inventory.lua
+Modules\ClassSpec.lua
+Modules\PlayerName.lua
+Modules\Equipable.lua
+Modules\VanityUnlock.lua
+Modules\WardrobeUnlock.lua
+Modules\MysticEnchant.lua
