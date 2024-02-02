@@ -358,7 +358,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
             else
               sold = count .. "x " .. itemLink
             end
-            --UseContainerItem(bag, slot)
+            UseContainerItem(bag, slot)
           end
         end
       end
