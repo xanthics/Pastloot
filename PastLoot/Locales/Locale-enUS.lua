@@ -141,6 +141,7 @@ LM["Inventory"] = true
 LM["Item Level"] = true
 LM["ItemLevel_DropDownTooltipDesc"] = [=[Selected rule will only match items when comparing the item level to this.
 (use 'current' for your currently equipped item level)]=]
+LM["Item ID"] = true
 LM["Item Name"] = true
 LM["Item Price"] = true
 LM["Later"] = true
@@ -188,6 +189,7 @@ LM["Selected rule will only match items with this type and subtype."] = true
 LM["Selected rule will only match these items."] = true
 LM["Selected rule will only match this quality of items."] = true
 LM["Selected rule will only match usable items."] = true
+LM["Temp Item ID"] = true
 LM["Temp Item Name"] = true
 LM["Temp Name"] = true
 LM["Temp Zone Name"] = true
