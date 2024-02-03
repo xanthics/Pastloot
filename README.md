@@ -4,6 +4,7 @@ Move the **Pastloot** folder, that is in the same folder as this README, to your
 
 Not yet ready for release
 
+```ini
 [Pre-release]
 review -> accept button
 macro to add/remove to default keep/vendor/delete rules
@@ -17,3 +18,4 @@ warn when unvendorable item matches sell rule
 implement "test mode"
 Module -> tsm prices
 Module -> tsm vs vendor
+```
