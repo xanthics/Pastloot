@@ -497,6 +497,7 @@ function PastLoot:EvaluateItem(ItemLink)
           StatusMsg = string.gsub(StatusMsg, "%%rule%%", RuleValue.Desc)
           self:Pour("|cff33ff99"..L["PastLoot"].."|r: "..StatusMsg)
         end
+        self.TestLink = nil
         return
       end --MatchedRule
     end  -- SkipRules
@@ -506,6 +507,7 @@ function PastLoot:EvaluateItem(ItemLink)
   if ( self.TestLink ) then
     self:Pour(L["No rules matched."])
   end
+  self.TestLink = nil
 end
 
 function PastLoot:CleanRules()
