@@ -35,6 +35,7 @@ Modules\TypeSubType.lua
 Modules\LearnedItem.lua
 Modules\ItemLevel.lua
 Modules\RequiredLevel.lua
+Modules\ItemID.lua
 Modules\ItemName.lua
 Modules\ItemPrice.lua
 Modules\Usable.lua
