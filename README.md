@@ -5,9 +5,9 @@ Move the **Pastloot** folder, that is in the same folder as this README, to your
 
 **Warnings** 
 
-An empty rule will match and do whatever the setting is.  EG if you have an empty vendor rule as your first rule, it will vendor everything a vendor price.
+An empty rule will match and do whatever the setting is.  EG if you have an empty vendor rule as your first rule, it will vendor everything a vendor price.  I intend to change this behavior.
 
-Not yet ready for release
+Full usable but not yet ready for release
 
 ```ini
 [Pre-release]
