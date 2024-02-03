@@ -52,7 +52,7 @@ PastLoot.OptionsTable = {
         _, PastLoot.TestLink = GetItemInfo(value)
         if ( PastLoot.TestLink ) then
           PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
-          PastLoot:START_LOOT_ROLL()
+          PastLoot:EvaluateItem(PastLoot.TestLink)
         else
           PastLoot.TestLink = nil  -- to make sure
         end
@@ -353,10 +353,19 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
           local result = PastLoot:EvaluateItem(itemLink)
           if result == 2 or result == 3 then
             amount = amount + count * vendor
-            if sold then
-              sold = sold .. ", ".. count .. "x " .. itemLink
+            if sold and strlen(sold) + strlen(itemLink) > 255 then
+              print("Sold: " .. sold)
+              sold = nil
+            end
+          -- only show count if > 1
+          local c = ""
+          if count > 1 then
+            c = count .. "x "
+          end
+          if sold then
+              sold = sold .. ", ".. c .. itemLink
             else
-              sold = count .. "x " .. itemLink
+              sold = c .. itemLink
             end
             UseContainerItem(bag, slot)
           end
