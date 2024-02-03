@@ -58,6 +58,28 @@ PastLoot.OptionsTable = {
         end
       end,
     },
+    ["TestAll"] = {
+      ["name"] = L["TestAll"],
+      ["desc"] = L["Test all items currently in your inventory"],
+      ["type"] = "input",
+      ["get"] = function() end,
+      ["set"] = function(info)
+        for bag=0,4 do
+          for slot=1, GetContainerNumSlots(bag) do
+            local itemLink = GetContainerItemLink(bag,slot)
+            if itemLink then
+              _, PastLoot.TestLink = GetItemInfo(itemLink)
+              if ( PastLoot.TestLink ) then
+                PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
+                PastLoot:EvaluateItem(PastLoot.TestLink)
+              else
+                PastLoot.TestLink = nil  -- to make sure
+              end
+            end
+          end
+        end
+      end,
+    },
     ["Options"] = {
       ["name"] = L["Options"],
       ["desc"] = L["General Options"],
@@ -505,7 +527,7 @@ function PastLoot:EvaluateItem(ItemLink)
   end --RuleKey, RuleValue
   self:Debug("Ran out of rules, ignoring")
   if ( self.TestLink ) then
-    self:Pour(L["No rules matched."])
+    self:Pour(ItemLink..": "..L["No rules matched."])
   end
   self.TestLink = nil
 end
