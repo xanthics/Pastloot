@@ -85,9 +85,9 @@ L["Unknown Filters"] = true
 L["Up"] = true
 L["Will roll greed on all loot matching this rule."] = true
 L["Will roll need on all loot matching this rule."] = true
-L["ItemInSet"] = true
 
 local LM = LibStub("AceLocale-3.0"):NewLocale("PastLoot_Modules", "enUS", true)
+LM["ItemInSet"] = true
 LM["In A Set"] = true
 LM["Not In A Set"] = true
 LM["Owned"] = true
