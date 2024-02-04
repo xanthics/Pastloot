@@ -168,7 +168,6 @@ end
 function module.Widget:GetMatch(RuleNum, Index)
   local RuleValue = self:GetData(RuleNum)
   local ID = RuleValue[Index][1], RuleValue[Index][2]
-  print(ID, module.CurrentMatch)
   if module.CurrentMatch == ID then
     module:Debug("Found item ID match")
     return true
