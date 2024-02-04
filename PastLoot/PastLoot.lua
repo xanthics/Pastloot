@@ -295,9 +295,23 @@ function PastLoot:OnInitialize()
   self.DropDownFrame = CreateFrame("Frame", "PastLoot_DropDownMenu", nil, "UIDropDownMenuTemplate")
 end
 
+local function update_sets()
+  PastLoot.setIDs = {} -- clear any existing set items
+  for i=1, GetNumEquipmentSets() do
+    local name = GetEquipmentSetInfo(i)
+    for _,v in pairs(GetEquipmentSetItemIDs(name)) do
+      if v > 1 then
+        PastLoot.setIDs[v] = true
+      end
+    end
+  end
+end
+
 function PastLoot:OnEnable()
   self:RegisterEvent("BAG_UPDATE")
   self:RegisterEvent("MERCHANT_SHOW")
+  self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
+  update_sets()
   self:SetupModulesOptionsTables() -- Creates Module header frames and lays them out in the scroll frame
   self:OnProfileChanged()
   self.LastRolls = {}  -- Last 10 rolls.
@@ -306,6 +320,7 @@ end
 function PastLoot:OnDisable()
   self:UnregisterEvent("BAG_UPDATE")
   self:UnregisterEvent("MERCHANT_SHOW")
+  self:UnregisterEvent("EQUIPMENT_SETS_CHANGED")
 end
 
 function PastLoot:OnProfileChanged()
@@ -356,6 +371,11 @@ local RollMethodLookup = {
   [2] = L["Vendor"],
   [3] = L["Destroy"],
 }
+
+function PastLoot:EQUIPMENT_SETS_CHANGED(Event, ...)
+  if Event ~= "EQUIPMENT_SETS_CHANGED" then return end
+  update_sets()
+end
 
 function PastLoot:BAG_UPDATE(Event, Bag, ...)
   if Event ~= "BAG_UPDATE" or Bag == nil or Bag < 0 or Bag > 4 then return end
