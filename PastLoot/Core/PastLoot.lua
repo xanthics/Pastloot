@@ -1,5 +1,5 @@
 ﻿local VERSION = "4.1 r135"
-PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "LibSink-2.0")
+PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 -- local LDBIcon = LibStub("LibDBIcon-1.0")
@@ -307,8 +307,9 @@ local function update_sets()
   end
 end
 
+local BUCKET_BAG_UPDATE
 function PastLoot:OnEnable()
-  self:RegisterEvent("BAG_UPDATE")
+  BUCKET_BAG_UPDATE = self:RegisterBucketEvent("BAG_UPDATE", 1)
   self:RegisterEvent("MERCHANT_SHOW")
   self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
   update_sets()
@@ -318,7 +319,7 @@ function PastLoot:OnEnable()
 end
 
 function PastLoot:OnDisable()
-  self:UnregisterEvent("BAG_UPDATE")
+  self:UnregisterBucket(BUCKET_BAG_UPDATE)
   self:UnregisterEvent("MERCHANT_SHOW")
   self:UnregisterEvent("EQUIPMENT_SETS_CHANGED")
 end
