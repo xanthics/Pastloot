@@ -34,7 +34,7 @@ module.ConfigOptions_RuleDefaults = {
   {
     "ItemPrice",
     -- {
-      -- [1] = { Operator, Comparison, Exception }
+    -- [1] = { Operator, Comparison, Exception }
     -- },
   },
 }
@@ -42,9 +42,9 @@ module.NewFilterValue_LogicalOperator = 1
 module.NewFilterValue_Comparison = 0
 
 function module:OnEnable()
-  if ( select(4, GetBuildInfo()) < 30200 ) then
+  if (select(4, GetBuildInfo()) < 30200) then
     self:CheckItemPriceLibrary()
-    if ( not GetSellValue ) then
+    if (not GetSellValue) then
       PastLoot:Print("GetSellValue() or ItemPrice-1.1 library not available")
       return
     end
@@ -54,8 +54,8 @@ function module:OnEnable()
 end
 
 function module:OnDisable()
-  if ( select(4, GetBuildInfo()) < 30200 ) then
-    if ( not GetSellValue ) then
+  if (select(4, GetBuildInfo()) < 30200) then
+    if (not GetSellValue) then
       return
     end
   end
@@ -63,18 +63,19 @@ function module:OnDisable()
   self:RemoveWidgets()
 end
 
-if ( select(4, GetBuildInfo()) < 30200 ) then
+if (select(4, GetBuildInfo()) < 30200) then
   module.OriginalGetSellValue = GetSellValue
   function module:CheckItemPriceLibrary()
-    if ( LibStub("ItemPrice-1.1", true) ) then
+    if (LibStub("ItemPrice-1.1", true)) then
       -- Use our function, or if it doesn't know it, try the original one (someone elses)
       GetSellValue = function(item)
         local id = type(item) == "number" and item or type(item) == "string" and tonumber(item:match("item:(%d+)"))
-        if ( not id and type(item) == "string" ) then -- Convert item name to itemid, only works if the player has the item in his bags
+        if (not id and type(item) == "string") then   -- Convert item name to itemid, only works if the player has the item in his bags
           local _, link = GetItemInfo(item)
           id = link and tonumber(link:match("item:(%d+)"))
         end
-        return id and (LibStub("ItemPrice-1.1"):GetPrice(id) or module.OriginalGetSellValue and module.OriginalGetSellValue(id))
+        return id and
+        (LibStub("ItemPrice-1.1"):GetPrice(id) or module.OriginalGetSellValue and module.OriginalGetSellValue(id))
       end
     end
   end
@@ -84,7 +85,7 @@ local function SetMoney_MoneyInputFrame(Frame, Money)
   local Gold = floor(Money / (COPPER_PER_SILVER * SILVER_PER_GOLD))
   local Silver = floor((Money - (Gold * COPPER_PER_SILVER * SILVER_PER_GOLD)) / COPPER_PER_SILVER)
   local Copper = mod(Money, COPPER_PER_SILVER)
-  if ( Gold == 0 and Silver == 0 and Copper == 0) then
+  if (Gold == 0 and Silver == 0 and Copper == 0) then
     Gold, Silver, Copper = "", "", ""
   end
   Frame.Gold:SetText(Gold)
@@ -122,7 +123,7 @@ function module:CreateEditBox(LeftOffsetX, LeftOffsetY, RightOffsetX, RightOffse
   Frame.RightTexture:SetWidth(8)
   Frame.RightTexture:SetHeight(20)
   Frame.RightTexture:SetPoint("RIGHT", Frame, "RIGHT", RightOffsetX, RightOffsetY)
-  
+
   Frame.MiddleTexture = Frame:CreateTexture(nil, "BACKGROUND")
   Frame.MiddleTexture:SetTexture("Interface\\Common\\Common-Input-Border")
   Frame.MiddleTexture:SetTexCoord(0.0625, 0.9375, 0, 0.625)
@@ -138,7 +139,7 @@ function module:CreateMoneyInputFrame()
   local Frame = CreateFrame("Frame")
   Frame:SetWidth(176)
   Frame:SetHeight(18)
-  
+
   Frame.Gold = self:CreateEditBox(-5, 0, 0, 0)
   Frame.Gold:SetParent(Frame)
   Frame.Gold:SetPoint("TOPLEFT", Frame, "TOPLEFT")
@@ -149,7 +150,7 @@ function module:CreateMoneyInputFrame()
   Frame.Gold:SetFontObject(ChatFontNormal)
   Frame.Gold:SetScript("OnEnterPressed", function() Frame.Silver:SetFocus() end)
   Frame.Gold:SetScript("OnTabPressed", function()
-    if ( IsShiftKeyDown() ) then
+    if (IsShiftKeyDown()) then
       Frame.Copper:SetFocus()
     else
       Frame.Silver:SetFocus()
@@ -163,7 +164,7 @@ function module:CreateMoneyInputFrame()
   Frame.Gold.IconTexture:SetWidth(13)
   Frame.Gold.IconTexture:SetHeight(13)
   Frame.Gold.IconTexture:SetPoint("LEFT", Frame.Gold, "RIGHT", 2, 0)
-  
+
   Frame.Silver = self:CreateEditBox(-5, 0, -10, 0)
   Frame.Silver:SetParent(Frame)
   Frame.Silver:SetPoint("LEFT", Frame.Gold, "RIGHT", 26, 0)
@@ -174,7 +175,7 @@ function module:CreateMoneyInputFrame()
   Frame.Silver:SetFontObject(ChatFontNormal)
   Frame.Silver:SetScript("OnEnterPressed", function() Frame.Copper:SetFocus() end)
   Frame.Silver:SetScript("OnTabPressed", function()
-    if ( IsShiftKeyDown() ) then
+    if (IsShiftKeyDown()) then
       Frame.Gold:SetFocus()
     else
       Frame.Copper:SetFocus()
@@ -188,7 +189,7 @@ function module:CreateMoneyInputFrame()
   Frame.Silver.IconTexture:SetWidth(13)
   Frame.Silver.IconTexture:SetHeight(13)
   Frame.Silver.IconTexture:SetPoint("LEFT", Frame.Silver, "RIGHT", -8, 0)
-  
+
   Frame.Copper = self:CreateEditBox(-5, 0, -10, 0)
   Frame.Copper:SetParent(Frame)
   Frame.Copper:SetPoint("LEFT", Frame.Silver, "RIGHT", 16, 0)
@@ -198,7 +199,7 @@ function module:CreateMoneyInputFrame()
   Frame.Copper:SetMaxLetters(2)
   Frame.Copper:SetFontObject(ChatFontNormal)
   Frame.Copper:SetScript("OnTabPressed", function()
-    if ( IsShiftKeyDown() ) then
+    if (IsShiftKeyDown()) then
       Frame.Silver:SetFocus()
     else
       Frame.Gold:SetFocus()
@@ -208,7 +209,7 @@ function module:CreateMoneyInputFrame()
     Frame.Copper:ClearFocus()
   end)
   Frame.Copper:SetScript("OnTextChanged", function() self:SetMoney() end)
-  
+
   Frame.Copper.IconTexture = Frame.Copper:CreateTexture(nil, "BACKGROUND")
   Frame.Copper.IconTexture:SetTexture("Interface\\MoneyFrame\\UI-MoneyIcons")
   Frame.Copper.IconTexture:SetTexCoord(0.5, 0.75, 0, 1)
@@ -224,23 +225,25 @@ end
 function module:CreateDropDown()
   local DropDown = CreateFrame("Frame", "PastLoot_Frames_Widgets_ItemPriceComparison", nil, "UIDropDownMenuTemplate")
   DropDown:EnableMouse(true)
-  DropDown:SetHitRectInsets(15, 15, 0 ,0)
-  _G[DropDown:GetName().."Text"]:SetJustifyH("CENTER")
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  DropDown:SetHitRectInsets(15, 15, 0, 0)
+  _G[DropDown:GetName() .. "Text"]:SetJustifyH("CENTER")
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetWidth(120, DropDown)
   else
     UIDropDownMenu_SetWidth(DropDown, 120)
   end
-  DropDown:SetScript("OnEnter", function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
+  DropDown:SetScript("OnEnter",
+    function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
   DropDown:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local DropDownButton = _G[DropDown:GetName().."Button"]
-  DropDownButton:SetScript("OnEnter", function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
+  local DropDownButton = _G[DropDown:GetName() .. "Button"]
+  DropDownButton:SetScript("OnEnter",
+    function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
   DropDownButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  DropDown.Title = DropDown:CreateFontString(DropDown:GetName().."Title", "BACKGROUND", "GameFontNormalSmall")
+  DropDown.Title = DropDown:CreateFontString(DropDown:GetName() .. "Title", "BACKGROUND", "GameFontNormalSmall")
   DropDown.Title:SetParent(DropDown)
   DropDown.Title:SetPoint("BOTTOMLEFT", DropDown, "TOPLEFT", 20, 0)
   DropDown.Title:SetText(L["Item Price"])
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     DropDown.initialize = function(...) self:DropDown_Init(DropDown, ...) end
   else
     DropDown.initialize = function(...) self:DropDown_Init(...) end
@@ -253,12 +256,13 @@ function module:CreateWidget()
   Frame.DropDown = self:CreateDropDown()
   Frame.DropDown:SetParent(Frame)
   Frame.DropDown:SetPoint("BOTTOMLEFT", Frame, "BOTTOMLEFT")
-  
+
   Frame.MoneyInputFrame = self:CreateMoneyInputFrame()
   Frame.MoneyInputFrame:SetParent(Frame)
   Frame.MoneyInputFrame:SetPoint("LEFT", Frame.DropDown, "RIGHT", 0, 3)
-  
-  Frame:SetHeight(math.max(Frame.DropDown:GetHeight() + Frame.DropDown.Title:GetHeight(), Frame.MoneyInputFrame:GetHeight()))
+
+  Frame:SetHeight(math.max(Frame.DropDown:GetHeight() + Frame.DropDown.Title:GetHeight(),
+    Frame.MoneyInputFrame:GetHeight()))
   Frame:SetWidth(Frame.DropDown:GetWidth() - 15 + Frame.MoneyInputFrame:GetWidth())
   Frame.YPaddingTop = 0
   Frame.XPaddingLeft = -15
@@ -274,16 +278,17 @@ function module:CreateWidget()
   Frame.PreferredPriority = 15
   return Frame
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption("ItemPrice", RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "number" or type(Value[2]) ~= "number" ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "number" or type(Value[2]) ~= "number") then
           Data[Key] = {
             module.NewFilterValue_LogicalOperator,
             module.NewFilterValue_Comparison,
@@ -297,7 +302,7 @@ function module.Widget:GetData(RuleNum)
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption("ItemPrice", Data)
   end
   return Data or {}
@@ -322,20 +327,20 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption("ItemPrice", Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
   local Value_LogicalOperator = Value[module.FilterIndex][1]
   local Value_Comparison = Value[module.FilterIndex][2]
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(module:GetDropDownText(Value_LogicalOperator), module.Widget.DropDown)
   else
     UIDropDownMenu_SetText(module.Widget.DropDown, module:GetDropDownText(Value_LogicalOperator))
@@ -363,38 +368,38 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
-  if ( select(4, GetBuildInfo()) < 30200 ) then
+  if (select(4, GetBuildInfo()) < 30200) then
     module.CurrentMatch = GetSellValue(ItemLink)
   else
     _, _, _, _, _, _, _, _, _, _, module.CurrentMatch = GetItemInfo(ItemLink)
   end
   module.CurrentMatch = module.CurrentMatch or 0
-  module:Debug("Item Price: "..module.CurrentMatch)
+  module:Debug("Item Price: " .. module.CurrentMatch)
 end
 
 function module.Widget:GetMatch(RuleNum, Index)
   local Value = self:GetData(RuleNum)
   local LogicalOperator = Value[Index][1]
   local Comparison = Value[Index][2]
-  if ( LogicalOperator > 1 ) then
-    if ( LogicalOperator == 2 ) then -- Equal To
-      if ( module.CurrentMatch ~= Comparison ) then
-        module:Debug("ItemPrice ("..module.CurrentMatch..") ~= "..Comparison)
+  if (LogicalOperator > 1) then
+    if (LogicalOperator == 2) then   -- Equal To
+      if (module.CurrentMatch ~= Comparison) then
+        module:Debug("ItemPrice (" .. module.CurrentMatch .. ") ~= " .. Comparison)
         return false
       end
-    elseif ( LogicalOperator == 3 ) then -- Not Equal To
-      if ( module.CurrentMatch == Comparison ) then
-        module:Debug("ItemPrice ("..module.CurrentMatch..") == "..Comparison)
+    elseif (LogicalOperator == 3) then   -- Not Equal To
+      if (module.CurrentMatch == Comparison) then
+        module:Debug("ItemPrice (" .. module.CurrentMatch .. ") == " .. Comparison)
         return false
       end
-    elseif ( LogicalOperator == 4 ) then -- Less than
-      if ( module.CurrentMatch >= Comparison ) then
-        module:Debug("ItemPrice ("..module.CurrentMatch..") >= "..Comparison)
+    elseif (LogicalOperator == 4) then   -- Less than
+      if (module.CurrentMatch >= Comparison) then
+        module:Debug("ItemPrice (" .. module.CurrentMatch .. ") >= " .. Comparison)
         return false
       end
-    elseif ( LogicalOperator == 5 ) then -- Greater than
-      if ( module.CurrentMatch <= Comparison ) then
-        module:Debug("ItemPrice ("..module.CurrentMatch..") <= "..Comparison)
+    elseif (LogicalOperator == 5) then   -- Greater than
+      if (module.CurrentMatch <= Comparison) then
+        module:Debug("ItemPrice (" .. module.CurrentMatch .. ") <= " .. Comparison)
         return false
       end
     end
@@ -407,7 +412,7 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     info.func = function(...) self:DropDown_OnClick(this, ...) end
   else
     info.func = function(...) self:DropDown_OnClick(...) end
@@ -425,7 +430,7 @@ function module:DropDown_OnClick(Frame)
   local LogicalOperator = Frame.value
   Value[self.FilterIndex][1] = LogicalOperator
   self:SetConfigOption("ItemPrice", Value)
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(self:GetDropDownText(LogicalOperator), Frame.owner)
   else
     UIDropDownMenu_SetText(Frame.owner, self:GetDropDownText(LogicalOperator))
@@ -433,7 +438,7 @@ function module:DropDown_OnClick(Frame)
 end
 
 function module:SetMoney()
-  if ( not self.FilterIndex ) then
+  if (not self.FilterIndex) then
     return
   end
   local Value = self.Widget:GetData()
@@ -444,7 +449,7 @@ end
 
 function module:GetItemPriceText(LogicalOperator, Comparison)
   for Key, Value in ipairs(self.Choices) do
-    if ( Value.Value == LogicalOperator ) then
+    if (Value.Value == LogicalOperator) then
       return string.gsub(Value.Text, "%%num%%", GetCoinTextureString(Comparison))
     end
   end
@@ -452,7 +457,7 @@ end
 
 function module:GetDropDownText(LogicalOperator)
   for Key, Value in ipairs(self.Choices) do
-    if ( Value.Value == LogicalOperator ) then
+    if (Value.Value == LogicalOperator) then
       return Value.Name
     end
   end

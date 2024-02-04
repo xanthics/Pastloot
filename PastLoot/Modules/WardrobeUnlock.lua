@@ -14,7 +14,7 @@ local module_tooltip = L["Selected rule will only match unlearned Wardrobe items
 
 local module = PastLoot:NewModule(module_name)
 
-module.Choices = {{
+module.Choices = { {
 	["Name"] = L["Any"],
 	["Value"] = 1,
 }, {
@@ -26,12 +26,12 @@ module.Choices = {{
 }, {
 	["Name"] = L["Unlocked from Different Item"],
 	["Value"] = 4,
-}}
+} }
 
 module.ConfigOptions_RuleDefaults = { -- { VariableName, Default },
-{module_key, {
-	-- [1] = { Value, Exception }
-}}}
+	{ module_key, {
+		-- [1] = { Value, Exception }
+	} } }
 module.NewFilterValue = 1
 
 function module:OnEnable()
@@ -49,6 +49,7 @@ function module:CreateWidget()
 	local frame_name = "PastLoot_Frames_Widgets_Wardrobe"
 	return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
@@ -61,7 +62,7 @@ function module.Widget:GetData(RuleNum)
 	end
 	for Key, Value in ipairs(Data) do
 		if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
-			Data[Key] = {module.NewFilterValue, false}
+			Data[Key] = { module.NewFilterValue, false }
 			Changed = true
 		end
 	end
@@ -76,7 +77,7 @@ end
 
 function module.Widget:AddNewFilter()
 	local Value = self:GetData()
-	table.insert(Value, {module.NewFilterValue, false})
+	table.insert(Value, { module.NewFilterValue, false })
 	module:SetConfigOption(module_key, Value)
 end
 
@@ -114,7 +115,7 @@ end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
 	local itemID = GetItemInfoFromHyperlink(ItemLink)
-	local Owned = 0 -- 0 means no Wardrobe line on tooltip
+	local Owned = 0           -- 0 means no Wardrobe line on tooltip
 	local _, _, _, _, _, _, sSubType = GetItemInfo(ItemLink)
 	if sSubType ~= "Thrown" then -- you can't get wardrobe unlocks from thrown weapons
 		if APPEARANCE_ITEM_INFO[itemID] then
@@ -123,7 +124,7 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
 				Owned = 2
 			elseif collectedID then -- unlocked but from different item
 				Owned = 4
-			else -- unknown
+			else                 -- unknown
 				Owned = 3
 			end
 		end
@@ -135,7 +136,9 @@ end
 function module.Widget:GetMatch(RuleNum, Index)
 	local RuleValue = self:GetData(RuleNum)
 	if (RuleValue[Index][1] == 1 and module.CurrentMatch > 0) or -- rule is "any" and item contains a Wardrobe line
-	(RuleValue[Index][1] > 1 and RuleValue[Index][1] == module.CurrentMatch) then return true end
+		(RuleValue[Index][1] > 1 and RuleValue[Index][1] == module.CurrentMatch) then
+		return true
+	end
 	return false
 end
 

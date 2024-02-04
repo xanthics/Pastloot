@@ -20,7 +20,7 @@ module.ConfigOptions_RuleDefaults = {
   {
     module_key,
     -- {
-      -- [1] = { Name, Type, Exception }
+    -- [1] = { Name, Type, Exception }
     -- },
   },
 }
@@ -57,18 +57,20 @@ end
 
 function module:CreateWidget()
   local frame_name = "PastLoot_Frames_Widgets_ItemName"
-  return PastLoot:CreateTextBoxOptionalCheckBox(self, module_name, frame_name, module_tooltip, L["Exact"], L["Exact_Desc"])
+  return PastLoot:CreateTextBoxOptionalCheckBox(self, module_name, frame_name, module_tooltip, L["Exact"],
+    L["Exact_Desc"])
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "string" or not ( Value[2] == "Exact" or Value[2] == "Partial" ) ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "string" or not (Value[2] == "Exact" or Value[2] == "Partial")) then
           Data[Key] = {
             module.NewFilterValue_Name,
             module.NewFilterValue_Type,
@@ -82,7 +84,7 @@ function module.Widget:GetData(RuleNum)
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption(module_key, Data)
   end
   return Data or {}
@@ -107,23 +109,23 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
-  if ( not Value or not Value[module.FilterIndex] ) then
+  if (not Value or not Value[module.FilterIndex]) then
     return
   end
   module.Widget.TextBox:SetText(Value[module.FilterIndex][1])
   module.Widget.TextBox:SetScript("OnUpdate", function(...) module:ScrollLeft(...) end)
-  if ( Value[module.FilterIndex][2] == "Exact" ) then
+  if (Value[module.FilterIndex][2] == "Exact") then
     module.Widget.CheckBox:SetChecked(true)
   else
     module.Widget.CheckBox:SetChecked(false)
@@ -148,24 +150,24 @@ end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
   module.CurrentMatch, _, _, _, _, _, _, _, _, _ = GetItemInfo(ItemLink)
-  module:Debug("Item name: "..(module.CurrentMatch or ""))
+  module:Debug("Item name: " .. (module.CurrentMatch or ""))
 end
 
 function module.Widget:GetMatch(RuleNum, Index)
   local RuleValue = self:GetData(RuleNum)
   local Name, Type = RuleValue[Index][1], RuleValue[Index][2]
-  if ( Type == "Exact" ) then
-    if ( string.lower(module.CurrentMatch) == string.lower(Name) ) then
+  if (Type == "Exact") then
+    if (string.lower(module.CurrentMatch) == string.lower(Name)) then
       module:Debug("Found item name (exact)")
       return true
     end
   else
     Name = string.lower(Name)
     local UseRegEx = module:GetProfileVariable("UseRegEx")
-    if ( not UseRegEx ) then
+    if (not UseRegEx) then
       Name = string.gsub(Name, "([%%%$%(%)%.%[%]%*%+%-%?%^])", "%%%1")
     end
-    if ( string.find(string.lower(module.CurrentMatch), Name) ) then
+    if (string.find(string.lower(module.CurrentMatch), Name)) then
       module:Debug("Found item name (partial)")
       return true
     end
@@ -181,7 +183,7 @@ end
 
 function module:Exact_OnClick(Frame, Button)
   local Value = self.Widget:GetData()
-  if ( Frame:GetChecked() ) then
+  if (Frame:GetChecked()) then
     Value[self.FilterIndex][2] = "Exact"
   else
     Value[self.FilterIndex][2] = "Partial"

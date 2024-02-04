@@ -14,7 +14,7 @@ local module_tooltip = L["Selected rule will only match unlearned mystic enchant
 
 local module = PastLoot:NewModule(module_name)
 
-module.Choices = {{
+module.Choices = { {
 	["Name"] = L["Any RE"],
 	["Value"] = 1,
 }, {
@@ -35,12 +35,12 @@ module.Choices = {{
 }, {
 	["Name"] = L["Non-WRE Unknown"],
 	["Value"] = 7,
-}}
+} }
 
 module.ConfigOptions_RuleDefaults = { -- { VariableName, Default },
-{module_key, {
-	-- [1] = { Value, Exception }
-}}}
+	{ module_key, {
+		-- [1] = { Value, Exception }
+	} } }
 module.NewFilterValue = 1
 
 function module:OnEnable()
@@ -58,6 +58,7 @@ function module:CreateWidget()
 	local frame_name = "PastLoot_Frames_Widgets_MysticEnchant"
 	return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
@@ -70,7 +71,7 @@ function module.Widget:GetData(RuleNum)
 	end
 	for Key, Value in ipairs(Data) do
 		if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
-			Data[Key] = {module.NewFilterValue, false}
+			Data[Key] = { module.NewFilterValue, false }
 			Changed = true
 		end
 	end
@@ -85,7 +86,7 @@ end
 
 function module.Widget:AddNewFilter()
 	local Value = self:GetData()
-	table.insert(Value, {module.NewFilterValue, false})
+	table.insert(Value, { module.NewFilterValue, false })
 	module:SetConfigOption(module_key, Value)
 end
 
@@ -146,14 +147,16 @@ function module.Widget:GetMatch(RuleNum, Index)
 	local RuleID = RuleValue[Index][1]
 
 	if module.CurrentMatch > 0 then
-		if (RuleID == 1) or -- any RE
-		(RuleID == 4 and module.CurrentMatch == 3) or -- wre known
-		(RuleID == 5 and module.CurrentMatch == 4) or -- wre unknown
-		(RuleID == 6 and module.CurrentMatch == 1) or -- non-wre known
-		(RuleID == 7 and module.CurrentMatch == 2) or -- non-wre unknown
-		(RuleID == 2 and module.CurrentMatch % 2 == 1) or -- re known
-		(RuleID == 3 and module.CurrentMatch % 2 == 0) -- re unknown
-		then return true end
+		if (RuleID == 1) or                         -- any RE
+			(RuleID == 4 and module.CurrentMatch == 3) or -- wre known
+			(RuleID == 5 and module.CurrentMatch == 4) or -- wre unknown
+			(RuleID == 6 and module.CurrentMatch == 1) or -- non-wre known
+			(RuleID == 7 and module.CurrentMatch == 2) or -- non-wre unknown
+			(RuleID == 2 and module.CurrentMatch % 2 == 1) or -- re known
+			(RuleID == 3 and module.CurrentMatch % 2 == 0) -- re unknown
+		then
+			return true
+		end
 	end
 
 	return false

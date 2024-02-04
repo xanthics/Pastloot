@@ -15,7 +15,7 @@ local module_tooltip = L["Selected rule will only match items with this type and
 local module = PastLoot:NewModule(module_name)
 local binv, BI
 
-if ( not LibStub("LibBabble-Inventory-3.0", true) ) then
+if (not LibStub("LibBabble-Inventory-3.0", true)) then
   return
 end
 
@@ -158,10 +158,10 @@ function module:SetupValues()
         {
           ["Name"] = BI["Sigils"] or "Sigils",
           ["Value"] = 11,
-        },  -- 3.0 added
+        }, -- 3.0 added
         {
           ["Name"] = BI["Relic"] or "Relic",
-          ["Value"] = 12,  -- 4.0.3 added
+          ["Value"] = 12, -- 4.0.3 added
         },
       },
     },
@@ -208,11 +208,11 @@ function module:SetupValues()
         {
           ["Name"] = BI["Inscription Bag"] or "Inscription Bag",
           ["Value"] = 10,
-        },  -- 3.0 added
+        }, -- 3.0 added
         {
           ["Name"] = BI["Tackle Box"] or "Tackle Box",
           ["Value"] = 11,
-        },  -- 4.0.3 added
+        }, -- 4.0.3 added
       },
     },
     {
@@ -256,7 +256,7 @@ function module:SetupValues()
           ["Value"] = 9,
         },
         {
-          ["Name"] = BI["Consumable"],  --Pending possible removal since 2.4.2  (Fel Blossom, Midsummer Ground Flower, Mana Emerald, Mana Ruby)  in 3.0 - (Fel Lotus, Scroll of Strength VI)
+          ["Name"] = BI["Consumable"], --Pending possible removal since 2.4.2  (Fel Blossom, Midsummer Ground Flower, Mana Emerald, Mana Ruby)  in 3.0 - (Fel Lotus, Scroll of Strength VI)
           ["Value"] = 10,
         },
       },
@@ -310,7 +310,7 @@ function module:SetupValues()
           ["Value"] = 11,
         },
       },
-    },  -- 3.0 Added
+    }, -- 3.0 Added
     {
       ["Name"] = BI["Trade Goods"] or "Trade Goods",
       ["Value"] = 6,
@@ -372,19 +372,19 @@ function module:SetupValues()
           ["Value"] = 13,
         },
         -- {
-          -- ["Name"] = BI["Armor Enchantment"] or "Armor Enchantment",
-          -- ["Value"] = 16,  -- 3.0 added, 4.0.3 removed
+        -- ["Name"] = BI["Armor Enchantment"] or "Armor Enchantment",
+        -- ["Value"] = 16,  -- 3.0 added, 4.0.3 removed
         -- },
         -- {
-          -- ["Name"] = BI["Weapon Enchantment"] or "Weapon Enchantment",
-          -- ["Value"] = 17,  -- 3.0 added, 4.0.3 removed
+        -- ["Name"] = BI["Weapon Enchantment"] or "Weapon Enchantment",
+        -- ["Value"] = 17,  -- 3.0 added, 4.0.3 removed
         -- },
         {
           ["Name"] = BI["Item Enchantment"] or "Item Enchantment",
-          ["Value"] = 18,  -- 4.0.3 added
+          ["Value"] = 18, -- 4.0.3 added
         },
         {
-          ["Name"] = BI["Trade Goods"],  --Pending possible removal since 2.4.2
+          ["Name"] = BI["Trade Goods"], --Pending possible removal since 2.4.2
           ["Value"] = 14,
         },
       },
@@ -493,7 +493,7 @@ function module:SetupValues()
         },
         {
           ["Name"] = BI["Inscription"] or "Inscription",
-          ["Value"] = 13,  -- Added 4.0.3 I think
+          ["Value"] = 13, -- Added 4.0.3 I think
         },
       },
     },
@@ -543,11 +543,11 @@ function module:SetupValues()
         },
         {
           ["Name"] = BI["Hydraulic"] or "Hydraulic",
-          ["Value"] = 11,  -- Added 4.0.3
+          ["Value"] = 11, -- Added 4.0.3
         },
         {
           ["Name"] = BI["Cogwheel"] or "Cogwheel",
-          ["Value"] = 12,  -- Added 4.0.3
+          ["Value"] = 12, -- Added 4.0.3
         },
       },
     },
@@ -615,12 +615,13 @@ function module:SetupValues()
     },
   }
 end
+
 module.ConfigOptions_RuleDefaults = {
   -- { VariableName, Default },
   {
     module_key,
     -- {
-      -- [1] = { Type, SubType, Exception }
+    -- [1] = { Type, SubType, Exception }
     -- },
 
   },
@@ -643,29 +644,30 @@ function module:CreateWidget()
   local frame_name = "PastLoot_Frames_Widgets_TypeSubType"
   return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "number" or type(Value[2]) ~= "number" ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "number" or type(Value[2]) ~= "number") then
           Data[Key] = {
             module.NewFilterValue_Type,
             module.NewFilterValue_SubType,
             false
           }
           Changed = true
-        else  -- Check to make sure they are valid
+        else -- Check to make sure they are valid
           local FoundType, FoundSubType
           for TypeKey, TypeValue in pairs(module.ItemTypes) do
-            if ( TypeValue.Value == Data[Key][1] ) then
+            if (TypeValue.Value == Data[Key][1]) then
               FoundType = true
               for SubTypeKey, SubTypeValue in pairs(TypeValue.SubTypes) do
-                if ( SubTypeValue.Value == Data[Key][2] ) then
+                if (SubTypeValue.Value == Data[Key][2]) then
                   FoundSubType = true
                   break
                 end
@@ -673,7 +675,7 @@ function module.Widget:GetData(RuleNum)
               break
             end
           end
-          if ( not FoundType or not FoundSubType ) then
+          if (not FoundType or not FoundSubType) then
             Data[Key] = {
               module.NewFilterValue_Type,
               module.NewFilterValue_SubType,
@@ -681,14 +683,14 @@ function module.Widget:GetData(RuleNum)
             }
             Changed = true
           end
-        end  -- If valid.
+        end -- If valid.
       end
     else
       Data = nil
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption(module_key, Data)
   end
   return Data or {}
@@ -713,20 +715,20 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
   local Value_Type = Value[module.FilterIndex][1]
   local Value_SubType = Value[module.FilterIndex][2]
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(module:GetTypeSlotText(Value_Type, Value_SubType), module.Widget)
   else
     UIDropDownMenu_SetText(module.Widget, module:GetTypeSlotText(Value_Type, Value_SubType))
@@ -756,9 +758,9 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
   module.CurrentTypeMatch = -1
   module.CurrentSubTypeMatch = -1
   for TypeKey, TypeValue in pairs(module.ItemTypes) do
-    if ( ItemType == TypeValue.Name ) then
+    if (ItemType == TypeValue.Name) then
       for SubTypeKey, SubTypeValue in pairs(TypeValue.SubTypes) do
-        if ( ItemSubType == SubTypeValue.Name ) then
+        if (ItemSubType == SubTypeValue.Name) then
           module.CurrentSubTypeMatch = SubTypeValue.Value
           break
         end
@@ -767,16 +769,16 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
       break
     end
   end
-  if ( ItemType ) then
-    module:Debug("Type: "..ItemType.." Found: ("..module.CurrentTypeMatch..") ")
-    if ( module.CurrentTypeMatch == -1 ) then
-      module:Debug("Could not find ItemType: "..ItemType)
+  if (ItemType) then
+    module:Debug("Type: " .. ItemType .. " Found: (" .. module.CurrentTypeMatch .. ") ")
+    if (module.CurrentTypeMatch == -1) then
+      module:Debug("Could not find ItemType: " .. ItemType)
     end
   end
-  if ( ItemSubType ) then
-    module:Debug("Sub Type: "..ItemSubType.." Found: ("..module.CurrentSubTypeMatch..") ")
-    if ( module.CurrentSubTypeMatch == -1 ) then
-      module:Debug("Could not find ItemSubType: "..ItemSubType)
+  if (ItemSubType) then
+    module:Debug("Sub Type: " .. ItemSubType .. " Found: (" .. module.CurrentSubTypeMatch .. ") ")
+    if (module.CurrentSubTypeMatch == -1) then
+      module:Debug("Could not find ItemSubType: " .. ItemSubType)
     end
   end
 end
@@ -785,14 +787,14 @@ function module.Widget:GetMatch(RuleNum, Index)
   local Value = self:GetData(RuleNum)
   local RuleType = Value[Index][1]
   local RuleSubType = Value[Index][2]
-  if ( RuleType > 1 ) then
-    if ( RuleType ~= module.CurrentTypeMatch ) then
+  if (RuleType > 1) then
+    if (RuleType ~= module.CurrentTypeMatch) then
       module:Debug("Type doesn't match")
       return false
     end
   end
-  if ( RuleSubType > 1 ) then
-    if ( RuleSubType ~= module.CurrentSubTypeMatch ) then
+  if (RuleSubType > 1) then
+    if (RuleSubType ~= module.CurrentSubTypeMatch) then
       module:Debug("SubType doesn't match")
       return false
     end
@@ -805,13 +807,13 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     info.func = function(...) self:DropDown_OnClick(this, ...) end
   else
     info.func = function(...) self:DropDown_OnClick(...) end
   end
   info.owner = Frame
-  if ( Level == 1 ) then
+  if (Level == 1) then
     for Key, Value in ipairs(self.ItemTypes) do
       info.text = Value.Name
       info.hasArrow = true
@@ -843,7 +845,7 @@ function module:DropDown_OnClick(Frame)
   Value[self.FilterIndex][1] = Frame.value.Type
   Value[self.FilterIndex][2] = Frame.value.SubType
   self:SetConfigOption(module_key, Value)
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(self:GetTypeSlotText(Frame.value.Type, Frame.value.SubType), Frame.owner)
   else
     UIDropDownMenu_SetText(Frame.owner, self:GetTypeSlotText(Frame.value.Type, Frame.value.SubType))
@@ -853,9 +855,9 @@ end
 
 function module:GetTypeSlotText(TypeID, SubTypeID)
   for TypeKey, TypeValue in ipairs(self.ItemTypes) do
-    if ( TypeValue.Value == TypeID ) then
+    if (TypeValue.Value == TypeID) then
       for SubTypeKey, SubTypeValue in ipairs(TypeValue.SubTypes) do
-        if ( SubTypeValue.Value == SubTypeID ) then
+        if (SubTypeValue.Value == SubTypeID) then
           local ReturnValue = string.gsub(L["%type% - %subtype%"], "%%type%%", TypeValue.Name)
           ReturnValue = string.gsub(ReturnValue, "%%subtype%%", SubTypeValue.Name)
           return ReturnValue

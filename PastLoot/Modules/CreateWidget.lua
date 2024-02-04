@@ -53,20 +53,20 @@ end
 ]]
 function PastLoot:CreateTextBoxOptionalCheckBox(module, module_name, frame_name, module_tooltip, ...)
     local Widget = CreateFrame("Frame", frame_name)
-  
-    local TextBox = CreateFrame("EditBox", frame_name.."TextBox")
+
+    local TextBox = CreateFrame("EditBox", frame_name .. "TextBox")
     TextBox:SetBackdrop({
-      ["bgFile"] = "Interface\\Tooltips\\UI-Tooltip-Background",
-      ["edgeFile"] = "Interface\\Tooltips\\UI-Tooltip-Border",
-      ["tile"] = true,
-      ["insets"] = {
-        ["top"] = 5,
-        ["bottom"] = 5,
-        ["left"] = 5,
-        ["right"] = 5,
-      },
-      ["tileSize"] = 32,
-      ["edgeSize"] = 16,
+        ["bgFile"] = "Interface\\Tooltips\\UI-Tooltip-Background",
+        ["edgeFile"] = "Interface\\Tooltips\\UI-Tooltip-Border",
+        ["tile"] = true,
+        ["insets"] = {
+            ["top"] = 5,
+            ["bottom"] = 5,
+            ["left"] = 5,
+            ["right"] = 5,
+        },
+        ["tileSize"] = 32,
+        ["edgeSize"] = 16,
     })
     TextBox:SetBackdropColor(0, 0, 0, 0.95)
     TextBox:SetFontObject(ChatFontNormal)
@@ -81,14 +81,14 @@ function PastLoot:CreateTextBoxOptionalCheckBox(module, module_name, frame_name,
     TextBox:SetScript("OnEscapePressed", function(Frame) Frame:ClearFocus() end)
     TextBox:SetScript("OnEditFocusGained", function(Frame) Frame:HighlightText() end)
     TextBox:SetScript("OnEditfocusLost", function(Frame)
-      Frame:HighlightText(0, 0)
-      module.Widget:DisplayWidget()
+        Frame:HighlightText(0, 0)
+        module.Widget:DisplayWidget()
     end)
     TextBox:SetScript("OnEnterPressed", function(Frame)
-      module.SetItemName(module, Frame)
-      Frame:ClearFocus()
+        module.SetItemName(module, Frame)
+        Frame:ClearFocus()
     end)
-    local Title = TextBox:CreateFontString(TextBox:GetName().."Title", "BACKGROUND", "GameFontNormalSmall")
+    local Title = TextBox:CreateFontString(TextBox:GetName() .. "Title", "BACKGROUND", "GameFontNormalSmall")
     Title:SetParent(TextBox)
     Title:SetPoint("BOTTOMLEFT", TextBox, "TOPLEFT", 3, 0)
     Title:SetText(module_name)
@@ -99,14 +99,14 @@ function PastLoot:CreateTextBoxOptionalCheckBox(module, module_name, frame_name,
     local checkbox_name, checkbox_desc = ...
     local CheckBox
     if checkbox_name then
-        CheckBox = CreateFrame("CheckButton", frame_name.."CheckBox", Widget, "UICheckButtonTemplate")
+        CheckBox = CreateFrame("CheckButton", frame_name .. "CheckBox", Widget, "UICheckButtonTemplate")
         CheckBox:SetHeight(24)
         CheckBox:SetWidth(24)
         CheckBox:SetHitRectInsets(0, -60, 0, 0)
         CheckBox:SetScript("OnLeave", function() GameTooltip:Hide() end)
         CheckBox:SetScript("OnClick", function(...) module:Exact_OnClick(...) end)
         CheckBox:SetScript("OnEnter", function() self:ShowTooltip(checkbox_name, checkbox_desc) end)
-        _G[CheckBox:GetName().."Text"]:SetText(checkbox_name)
+        _G[CheckBox:GetName() .. "Text"]:SetText(checkbox_name)
         CheckBox:SetPoint("BOTTOMLEFT", TextBox, "BOTTOMRIGHT", 5, 0)
         Widget.CheckBox = CheckBox
     end
@@ -123,11 +123,11 @@ function PastLoot:CreateTextBoxOptionalCheckBox(module, module_name, frame_name,
     end
     Widget.PreferredPriority = 14
     Widget.Info = {
-      module_name,
-      module_tooltip,
+        module_name,
+        module_tooltip,
     }
     return Widget
-  end
+end
 
 --[[
     Creates a dropdown list that includes edit boxes for custom values

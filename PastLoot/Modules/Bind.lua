@@ -55,10 +55,10 @@ module.Choices = {
 }
 module.ConfigOptions_RuleDefaults = {
   -- { VariableName, Default },
-  { 
+  {
     module_key,
     -- {
-      -- [1] = { Value, Exception }
+    -- [1] = { Value, Exception }
     -- },
   },
 }
@@ -79,16 +79,17 @@ function module:CreateWidget()
   local frame_name = "PastLoot_Frames_Widgets_Bind"
   return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "number" ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
           Data[Key] = { module.NewFilterValue, false }
           Changed = true
         end
@@ -98,7 +99,7 @@ function module.Widget:GetData(RuleNum)
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption(module_key, Data)
   end
   return Data or {}
@@ -118,18 +119,18 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(module:GetBindSlotText(Value[module.FilterIndex][1]), module.Widget)
   else
     UIDropDownMenu_SetText(module.Widget, module:GetBindSlotText(Value[module.FilterIndex][1]))
@@ -160,15 +161,15 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
   -- Scan till line 4 or until newline character detected (patterns have a newline, not sure if anything else does)
   Bind = 2 -- module.Bind[2] = "None"
   for Index = 2, math.min(4, Tooltip:NumLines()) do
-    Line = _G[Tooltip:GetName().."TextLeft"..Index]
-    if ( Line ) then
+    Line = _G[Tooltip:GetName() .. "TextLeft" .. Index]
+    if (Line) then
       LineText = Line:GetText()
-      if ( LineText and LineText ~= "" ) then
-        if ( string.find(LineText, "^\n") ) then
+      if (LineText and LineText ~= "") then
+        if (string.find(LineText, "^\n")) then
           break
         end
         for Key = 3, #module.Choices do --Don't check for Key 1 (Any) or 2 (None)
-          if ( LineText == module.Choices[Key].Type ) then
+          if (LineText == module.Choices[Key].Type) then
             Bind = Key
             break
           end
@@ -177,13 +178,13 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
     end
   end
   module.CurrentMatch = Bind
-  module:Debug("Bind Type: "..Bind.." ("..module:GetBindSlotText(Bind)..")")
+  module:Debug("Bind Type: " .. Bind .. " (" .. module:GetBindSlotText(Bind) .. ")")
 end
 
 function module.Widget:GetMatch(RuleNum, Index)
   local RuleValue = self:GetData(RuleNum)
-  if ( RuleValue[Index][1] > 1 ) then
-    if ( RuleValue[Index][1] ~= module.CurrentMatch ) then
+  if (RuleValue[Index][1] > 1) then
+    if (RuleValue[Index][1] ~= module.CurrentMatch) then
       return false
     end
   end
@@ -195,7 +196,7 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     info.func = function(...) self:DropDown_OnClick(this, ...) end
   else
     info.func = function(...) self:DropDown_OnClick(...) end
@@ -212,7 +213,7 @@ function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   Value[self.FilterIndex][1] = Frame.value
   self:SetConfigOption(module_key, Value)
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(Frame:GetText(), Frame.owner)
   else
     UIDropDownMenu_SetText(Frame.owner, Frame:GetText())
@@ -221,10 +222,9 @@ end
 
 function module:GetBindSlotText(BindID)
   for Key, Value in ipairs(self.Choices) do
-    if ( Value.Value == BindID ) then
+    if (Value.Value == BindID) then
       return Value.Name
     end
   end
   return ""
 end
-

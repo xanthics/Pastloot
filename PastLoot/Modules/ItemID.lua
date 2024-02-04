@@ -20,7 +20,7 @@ module.ConfigOptions_RuleDefaults = {
   {
     module_key,
     -- {
-      -- [1] = { Name, Type, Exception }
+    -- [1] = { Name, Type, Exception }
     -- },
   },
 }
@@ -40,16 +40,17 @@ function module:CreateWidget()
   local frame_name = "PastLoot_Frames_Widgets_ItemID"
   return PastLoot:CreateTextBoxOptionalCheckBox(self, module_name, frame_name, module_tooltip)
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "string" ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "string") then
           Data[Key] = {
             module.NewFilterValue_ID,
             false
@@ -62,7 +63,7 @@ function module.Widget:GetData(RuleNum)
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption(module_key, Data)
   end
   return Data or {}
@@ -86,18 +87,18 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
-  if ( not Value or not Value[module.FilterIndex] ) then
+  if (not Value or not Value[module.FilterIndex]) then
     return
   end
   module.Widget.TextBox:SetText(Value[module.FilterIndex][1])
@@ -122,7 +123,7 @@ end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
   module.CurrentMatch = select(3, ItemLink:find("item:(%d-):"))
-  module:Debug("Item ID: "..(module.CurrentMatch or ""))
+  module:Debug("Item ID: " .. (module.CurrentMatch or ""))
 end
 
 function module.Widget:GetMatch(RuleNum, Index)
@@ -133,7 +134,7 @@ function module.Widget:GetMatch(RuleNum, Index)
     return true
   end
 
-    return false
+  return false
 end
 
 -- should be SetItemID, but trying to template the Widget creation

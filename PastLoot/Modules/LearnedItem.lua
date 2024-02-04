@@ -33,7 +33,7 @@ module.ConfigOptions_RuleDefaults = {
   {
     module_key,
     -- {
-      -- [1] = { Value, Exception }
+    -- [1] = { Value, Exception }
     -- },
   },
 }
@@ -50,19 +50,21 @@ function module:OnDisable()
   self:RemoveWidgets()
 end
 
-function module:CreateWidget()  local frame_name = "PastLoot_Frames_Widgets_LearnedItem"
+function module:CreateWidget()
+  local frame_name = "PastLoot_Frames_Widgets_LearnedItem"
   return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
+
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "number" ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
           Data[Key] = { module.NewFilterValue, false }
           Changed = true
         end
@@ -72,7 +74,7 @@ function module.Widget:GetData(RuleNum)
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption(module_key, Data)
   end
   return Data or {}
@@ -92,18 +94,18 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(module:GetLearnedItemText(Value[module.FilterIndex][1]), module.Widget)
   else
     UIDropDownMenu_SetText(module.Widget, module:GetLearnedItemText(Value[module.FilterIndex][1]))
@@ -128,31 +130,31 @@ end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
   local TextLine, Text
-  module.CurrentMatch = 3  -- module.Choices[2] = "Unlearned"
+  module.CurrentMatch = 3 -- module.Choices[2] = "Unlearned"
   -- Found on line 7 of Reins of the Bronze Drake
   for Index = 2, Tooltip:NumLines() do
-    TextLine = _G[Tooltip:GetName().."TextLeft"..Index]
-    if ( TextLine ) then
+    TextLine = _G[Tooltip:GetName() .. "TextLeft" .. Index]
+    if (TextLine) then
       Text = TextLine:GetText()
       -- Search for the "Already known" text unless we hit a newline character at the beginning of a line.
       -- new line is usually a recipe.  We don't want to scan the item a recipe makes
       -- as that might be a mount (mechano-hog / chopper) that might be learned.
       -- Might be items other than recipes that are similar...
-      if ( Text == nil or string.find(Text, "^\n") ) then
+      if (Text == nil or string.find(Text, "^\n")) then
         break
-      elseif ( Text == ITEM_SPELL_KNOWN ) then
-        module.CurrentMatch = 2  -- module.Choices[2] = "Learned"
+      elseif (Text == ITEM_SPELL_KNOWN) then
+        module.CurrentMatch = 2 -- module.Choices[2] = "Learned"
         break
       end
     end
   end
-  module:Debug("Learned Item: "..module.CurrentMatch.." ("..module:GetLearnedItemText(module.CurrentMatch)..")")
+  module:Debug("Learned Item: " .. module.CurrentMatch .. " (" .. module:GetLearnedItemText(module.CurrentMatch) .. ")")
 end
 
 function module.Widget:GetMatch(RuleNum, Index)
   local RuleValue = self:GetData(RuleNum)
-  if ( RuleValue[Index][1] > 1 ) then
-    if ( RuleValue[Index][1] ~= module.CurrentMatch ) then
+  if (RuleValue[Index][1] > 1) then
+    if (RuleValue[Index][1] ~= module.CurrentMatch) then
       return false
     end
   end
@@ -164,7 +166,7 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     info.func = function(...) self:DropDown_OnClick(this, ...) end
   else
     info.func = function(...) self:DropDown_OnClick(...) end
@@ -181,7 +183,7 @@ function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   Value[self.FilterIndex][1] = Frame.value
   self:SetConfigOption(module_key, Value)
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(Frame:GetText(), Frame.owner)
   else
     UIDropDownMenu_SetText(Frame.owner, Frame:GetText())
@@ -190,10 +192,9 @@ end
 
 function module:GetLearnedItemText(Which)
   for Key, Value in ipairs(self.Choices) do
-    if ( Value.Value == Which ) then
+    if (Value.Value == Which) then
       return Value.Name
     end
   end
   return ""
 end
-

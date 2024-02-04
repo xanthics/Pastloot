@@ -46,7 +46,7 @@ module.ConfigOptions_RuleDefaults = {
   {
     module_key,
     -- {
-      -- [1] = { Operator, Comparison, Exception }
+    -- [1] = { Operator, Comparison, Exception }
     -- },
   },
 }
@@ -71,16 +71,17 @@ function module:CreateWidget()
   local DropDownEditBox = PastLoot:CreateDropDownEditBox(self, dropdownframe_name)
   return DropDown, DropDownEditBox
 end
+
 module.Widget, module.DropDownEditBox = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
   local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
-  if ( Data ) then
-    if ( type(Data) == "table" and #Data > 0 ) then
+  if (Data) then
+    if (type(Data) == "table" and #Data > 0) then
       for Key, Value in ipairs(Data) do
-        if ( type(Value) ~= "table" or type(Value[1]) ~= "number" or (type(Value[2]) ~= "number" and type(Value[2]) ~= "string") ) then
+        if (type(Value) ~= "table" or type(Value[1]) ~= "number" or (type(Value[2]) ~= "number" and type(Value[2]) ~= "string")) then
           Data[Key] = {
             module.NewFilterValue_LogicalOperator,
             module.NewFilterValue_Comparison,
@@ -94,7 +95,7 @@ function module.Widget:GetData(RuleNum)
       Changed = true
     end
   end
-  if ( Changed ) then
+  if (Changed) then
     module:SetConfigOption(module_key, Data)
   end
   return Data or {}
@@ -119,20 +120,20 @@ end
 function module.Widget:RemoveFilter(Index)
   local Value = self:GetData()
   table.remove(Value, Index)
-  if ( #Value == 0 ) then
+  if (#Value == 0) then
     Value = nil
   end
   module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
-  if ( Index ) then
+  if (Index) then
     module.FilterIndex = Index
   end
   local Value = self:GetData()
   local Value_LogicalOperator = Value[module.FilterIndex][1]
   local Value_Comparison = Value[module.FilterIndex][2]
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(module:GetItemLevelText(Value_LogicalOperator, Value_Comparison), module.Widget)
   else
     UIDropDownMenu_SetText(module.Widget, module:GetItemLevelText(Value_LogicalOperator, Value_Comparison))
@@ -194,11 +195,11 @@ function module.Widget:GetCurrentItem(ItemLink)
   _, _, _, _, _, _, _, _, EquipSlot, _ = GetItemInfo(ItemLink)
   local InvSlot = self.EquipSlotToInvNumber[EquipSlot]
   local ReturnValues = {}
-  if ( InvSlot ) then
+  if (InvSlot) then
     local Link
     for Key, Value in pairs(InvSlot) do
       Link = GetInventoryItemLink("player", Value)
-      if ( Link ) then
+      if (Link) then
         table.insert(ReturnValues, Link)
       end
     end
@@ -209,11 +210,11 @@ end
 function module.Widget:SetMatch(ItemLink, Tooltip)
   _, _, _, module.CurrentMatch = GetItemInfo(ItemLink)
   module.CurrentMatch = module.CurrentMatch or 0
-  
+
   local CurrentItem, ItemLevel
   for Key, Value in pairs(self:GetCurrentItem(ItemLink)) do
     _, _, _, ItemLevel = GetItemInfo(Value)
-    if ( ItemLevel ) then
+    if (ItemLevel) then
       CurrentItem = math.min(ItemLevel, CurrentItem or ItemLevel)
     end
   end
@@ -225,25 +226,25 @@ function module.Widget:GetMatch(RuleNum, Index)
   local Value = self:GetData(RuleNum)
   local LogicalOperator = Value[Index][1]
   local Comparison = self:Evaluate(Value[Index][2])
-  if ( LogicalOperator > 1 ) then
-    if ( LogicalOperator == 2 ) then -- Equal To
-      if ( module.CurrentMatch ~= Comparison ) then
-        module:Debug("ItemLevel ("..module.CurrentMatch..") ~= "..Comparison)
+  if (LogicalOperator > 1) then
+    if (LogicalOperator == 2) then   -- Equal To
+      if (module.CurrentMatch ~= Comparison) then
+        module:Debug("ItemLevel (" .. module.CurrentMatch .. ") ~= " .. Comparison)
         return false
       end
-    elseif ( LogicalOperator == 3 ) then -- Not Equal To
-      if ( module.CurrentMatch == Comparison ) then
-        module:Debug("ItemLevel ("..module.CurrentMatch..") == "..Comparison)
+    elseif (LogicalOperator == 3) then   -- Not Equal To
+      if (module.CurrentMatch == Comparison) then
+        module:Debug("ItemLevel (" .. module.CurrentMatch .. ") == " .. Comparison)
         return false
       end
-    elseif ( LogicalOperator == 4 ) then -- Less than
-      if ( module.CurrentMatch >= Comparison ) then
-        module:Debug("ItemLevel ("..module.CurrentMatch..") >= "..Comparison)
+    elseif (LogicalOperator == 4) then   -- Less than
+      if (module.CurrentMatch >= Comparison) then
+        module:Debug("ItemLevel (" .. module.CurrentMatch .. ") >= " .. Comparison)
         return false
       end
-    elseif ( LogicalOperator == 5 ) then -- Greater than
-      if ( module.CurrentMatch <= Comparison ) then
-        module:Debug("ItemLevel ("..module.CurrentMatch..") <= "..Comparison)
+    elseif (LogicalOperator == 5) then   -- Greater than
+      if (module.CurrentMatch <= Comparison) then
+        module:Debug("ItemLevel (" .. module.CurrentMatch .. ") <= " .. Comparison)
         return false
       end
     end
@@ -256,24 +257,25 @@ end
 module.Widget.Environment = {
   [L["current"]] = 0,
 }
-module.Widget.CachedFunc, module.Widget.CachedError = {}, {} -- A list of functions and errors we have already tried loading
+module.Widget.CachedFunc, module.Widget.CachedError = {},
+    {}                                                       -- A list of functions and errors we have already tried loading
 function module.Widget:Evaluate(Logic)
   local Function, Error = self.CachedFunc[Logic], self.CachedError[Logic]
-  if ( not Function and not Error ) then
-    Function, Error = loadstring("return "..Logic)
+  if (not Function and not Error) then
+    Function, Error = loadstring("return " .. Logic)
     self.CachedFunc[Logic], self.CachedError[Logic] = Function, Error
   end
-  if ( Function and not Error ) then
-    setfenv(Function, self.Environment)  -- Limit what the loaded logic string can access
-    local Success, ReturnValue = pcall(Function)  -- Catch errors.
-    if ( Success ) then 
+  if (Function and not Error) then
+    setfenv(Function, self.Environment)          -- Limit what the loaded logic string can access
+    local Success, ReturnValue = pcall(Function) -- Catch errors.
+    if (Success) then
       return ReturnValue
     else
-      self:Debug("Could not evaluate "..(Logic or "").." - "..(ReturnValue or ""))
+      self:Debug("Could not evaluate " .. (Logic or "") .. " - " .. (ReturnValue or ""))
       return
     end
   else
-    self:Debug("Could not evaluate "..(Logic or "").." - "..(Error or ""))
+    self:Debug("Could not evaluate " .. (Logic or "") .. " - " .. (Error or ""))
   end
 end
 
@@ -282,17 +284,17 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     info.func = function(...) self:DropDown_OnClick(this, ...) end
   else
     info.func = function(...) self:DropDown_OnClick(...) end
   end
   info.owner = Frame
-  if ( Level == 1 ) then
+  if (Level == 1) then
     for Key, Value in ipairs(self.Choices) do
       info.text = Value.Name
       info.value = Value.Value
-      if ( Key == 1 ) then
+      if (Key == 1) then
         info.hasArrow = false
       else
         info.hasArrow = true
@@ -324,13 +326,13 @@ function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   local LogicalOperator = Frame.value
   local Comparison = Value[self.FilterIndex][2]
-  if ( Frame:GetName() == self.DropDownEditBox:GetName() ) then
+  if (Frame:GetName() == self.DropDownEditBox:GetName()) then
     Comparison = Frame:GetText() or ""
   end
   Value[self.FilterIndex][1] = LogicalOperator
   Value[self.FilterIndex][2] = Comparison
   self:SetConfigOption(module_key, Value)
-  if ( select(4, GetBuildInfo()) < 30000 ) then
+  if (select(4, GetBuildInfo()) < 30000) then
     UIDropDownMenu_SetText(self:GetItemLevelText(LogicalOperator, Comparison), Frame.owner)
   else
     UIDropDownMenu_SetText(Frame.owner, self:GetItemLevelText(LogicalOperator, Comparison))
@@ -342,7 +344,7 @@ end
 
 function module:GetItemLevelText(LogicalOperator, Comparison)
   for Key, Value in ipairs(self.Choices) do
-    if ( Value.Value == LogicalOperator ) then
+    if (Value.Value == LogicalOperator) then
       return string.gsub(Value.Text, "%%num%%", Comparison)
     end
   end
