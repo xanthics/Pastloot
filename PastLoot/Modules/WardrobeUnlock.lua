@@ -1,6 +1,18 @@
 ﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
-local module = PastLoot:NewModule(L["Wardrobe Unlock"])
+--[[
+Checklist if creating a new module
+- first choose an existing module that most closely matches what you want to do
+- modify module_key, module_name, module_tooltip to unique values
+- make sure to update locales
+- Modify SetMatch and GetMatch
+- Create/Modify local functions as needed
+]]
+local module_key = "Wardrobe"
+local module_name = L["Wardrobe Unlock"]
+local module_tooltip = L["Selected rule will only match unlearned Wardrobe items."]
+
+local module = PastLoot:NewModule(module_name)
 
 module.Choices = {{
 	["Name"] = L["Any"],
@@ -17,7 +29,7 @@ module.Choices = {{
 }}
 
 module.ConfigOptions_RuleDefaults = { -- { VariableName, Default },
-{"Wardrobe", {
+{module_key, {
 	-- [1] = { Value, Exception }
 }}}
 module.NewFilterValue = 1
@@ -34,45 +46,14 @@ function module:OnDisable()
 end
 
 function module:CreateWidget()
-	local Widget = CreateFrame("Frame", "PastLoot_Frames_Widgets_Wardrobe", nil, "UIDropDownMenuTemplate")
-	Widget:EnableMouse(true)
-	Widget:SetHitRectInsets(15, 15, 0, 0)
-	_G[Widget:GetName() .. "Text"]:SetJustifyH("CENTER")
-	if (select(4, GetBuildInfo()) < 30000) then
-		UIDropDownMenu_SetWidth(120, Widget)
-	else
-		UIDropDownMenu_SetWidth(Widget, 120)
-	end
-	Widget:SetScript("OnEnter", function() self:ShowTooltip(L["Wardrobe Unlock"], L["Selected rule will only match unlearned Wardrobe items."]) end)
-	Widget:SetScript("OnLeave", function() GameTooltip:Hide() end)
-	local Button = _G[Widget:GetName() .. "Button"]
-	Button:SetScript("OnEnter", function() self:ShowTooltip(L["Wardrobe Unlock"], L["Selected rule will only match unlearned Wardrobe items."]) end)
-	Button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-	local Title = Widget:CreateFontString(Widget:GetName() .. "Title", "BACKGROUND", "GameFontNormalSmall")
-	Title:SetParent(Widget)
-	Title:SetPoint("BOTTOMLEFT", Widget, "TOPLEFT", 20, 0)
-	Title:SetText(L["Wardrobe Unlock"])
-	Widget:SetParent(nil)
-	Widget:Hide()
-	if (select(4, GetBuildInfo()) < 30000) then
-		Widget.initialize = function(...) self:DropDown_Init(Widget, ...) end
-	else
-		Widget.initialize = function(...) self:DropDown_Init(...) end
-	end
-	Widget.YPaddingTop = Title:GetHeight()
-	Widget.Height = Widget:GetHeight() + Widget.YPaddingTop
-	Widget.XPaddingLeft = -15
-	Widget.XPaddingRight = -15
-	Widget.Width = Widget:GetWidth() + Widget.XPaddingLeft + Widget.XPaddingRight
-	Widget.PreferredPriority = 4
-	Widget.Info = {L["Wardrobe Unlock"], L["Selected rule will only match unlearned Wardrobe items."]}
-	return Widget
+	local frame_name = "PastLoot_Frames_Widgets_Wardrobe"
+	return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
-	local Data = module:GetConfigOption("Wardrobe", RuleNum)
+	local Data = module:GetConfigOption(module_key, RuleNum)
 	local Changed = false
 	if (not Data or type(Data) ~= "table") then
 		Data = {}
@@ -84,7 +65,7 @@ function module.Widget:GetData(RuleNum)
 			Changed = true
 		end
 	end
-	if (Changed) then module:SetConfigOption("Wardrobe", Data) end
+	if (Changed) then module:SetConfigOption(module_key, Data) end
 	return Data
 end
 
@@ -96,13 +77,13 @@ end
 function module.Widget:AddNewFilter()
 	local Value = self:GetData()
 	table.insert(Value, {module.NewFilterValue, false})
-	module:SetConfigOption("Wardrobe", Value)
+	module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:RemoveFilter(Index)
 	local Value = self:GetData()
 	table.remove(Value, Index)
-	module:SetConfigOption("Wardrobe", Value)
+	module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
@@ -178,7 +159,7 @@ end
 function module:DropDown_OnClick(Frame)
 	local Value = self.Widget:GetData()
 	Value[self.FilterIndex][1] = Frame.value
-	self:SetConfigOption("Wardrobe", Value)
+	self:SetConfigOption(module_key, Value)
 	if (select(4, GetBuildInfo()) < 30000) then
 		UIDropDownMenu_SetText(Frame:GetText(), Frame.owner)
 	else

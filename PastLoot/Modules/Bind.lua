@@ -1,6 +1,20 @@
 ﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
-local module = PastLoot:NewModule(L["Binds On"])
+
+--[[
+Checklist if creating a new module
+- first choose an existing module that most closely matches what you want to do
+- modify module_key, module_name, module_tooltip to unique values
+- make sure to update locales
+- Modify SetMatch and GetMatch
+- Create/Modify local functions as needed
+]]
+local module_key = "Bind"
+local module_name = L["Bind On"]
+local module_tooltip = L["Selected rule will only match these items."]
+
+local module = PastLoot:NewModule(module_name)
+
 
 module.Choices = {
   {
@@ -42,7 +56,7 @@ module.Choices = {
 module.ConfigOptions_RuleDefaults = {
   -- { VariableName, Default },
   { 
-    "Bind",
+    module_key,
     -- {
       -- [1] = { Value, Exception }
     -- },
@@ -62,48 +76,14 @@ function module:OnDisable()
 end
 
 function module:CreateWidget()
-  local Widget = CreateFrame("Frame", "PastLoot_Frames_Widgets_Bind", nil, "UIDropDownMenuTemplate")
-  Widget:EnableMouse(true)
-  Widget:SetHitRectInsets(15, 15, 0 ,0)
-  _G[Widget:GetName().."Text"]:SetJustifyH("CENTER")
-  if ( select(4, GetBuildInfo()) < 30000 ) then
-    UIDropDownMenu_SetWidth(120, Widget)
-  else
-    UIDropDownMenu_SetWidth(Widget, 120)
-  end
-  Widget:SetScript("OnEnter", function() self:ShowTooltip(L["Bind On"], L["Selected rule will only match these items."]) end)
-  Widget:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local Button = _G[Widget:GetName().."Button"]
-  Button:SetScript("OnEnter", function() self:ShowTooltip(L["Bind On"], L["Selected rule will only match these items."]) end)
-  Button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local Title = Widget:CreateFontString(Widget:GetName().."Title", "BACKGROUND", "GameFontNormalSmall")
-  Title:SetParent(Widget)
-  Title:SetPoint("BOTTOMLEFT", Widget, "TOPLEFT", 20, 0)
-  Title:SetText(L["Bind On"])
-  Widget:SetParent(nil)
-  Widget:Hide()
-  if ( select(4, GetBuildInfo()) < 30000 ) then
-    Widget.initialize = function(...) self:DropDown_Init(Widget, ...) end
-  else
-    Widget.initialize = function(...) self:DropDown_Init(...) end
-  end
-  Widget.YPaddingTop = Title:GetHeight()
-  Widget.Height = Widget:GetHeight() + Widget.YPaddingTop
-  Widget.XPaddingLeft = -15
-  Widget.XPaddingRight = -15
-  Widget.Width = Widget:GetWidth() + Widget.XPaddingLeft + Widget.XPaddingRight
-  Widget.PreferredPriority = 4
-  Widget.Info = {
-    L["Bind On"],
-    L["Selected rule will only match these items."],
-  }
-  return Widget
+  local frame_name = "PastLoot_Frames_Widgets_Bind"
+  return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
-  local Data = module:GetConfigOption("Bind", RuleNum)
+  local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
   if ( Data ) then
     if ( type(Data) == "table" and #Data > 0 ) then
@@ -119,7 +99,7 @@ function module.Widget:GetData(RuleNum)
     end
   end
   if ( Changed ) then
-    module:SetConfigOption("Bind", Data)
+    module:SetConfigOption(module_key, Data)
   end
   return Data or {}
 end
@@ -132,7 +112,7 @@ end
 function module.Widget:AddNewFilter()
   local Value = self:GetData()
   table.insert(Value, { module.NewFilterValue, false })
-  module:SetConfigOption("Bind", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:RemoveFilter(Index)
@@ -141,7 +121,7 @@ function module.Widget:RemoveFilter(Index)
   if ( #Value == 0 ) then
     Value = nil
   end
-  module:SetConfigOption("Bind", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
@@ -169,7 +149,7 @@ end
 function module.Widget:SetException(RuleNum, Index, Value)
   local Data = self:GetData(RuleNum)
   Data[Index][2] = Value
-  module:SetConfigOption("Bind", Data)
+  module:SetConfigOption(module_key, Data)
 end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
@@ -231,7 +211,7 @@ end
 function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   Value[self.FilterIndex][1] = Frame.value
-  self:SetConfigOption("Bind", Value)
+  self:SetConfigOption(module_key, Value)
   if ( select(4, GetBuildInfo()) < 30000 ) then
     UIDropDownMenu_SetText(Frame:GetText(), Frame.owner)
   else

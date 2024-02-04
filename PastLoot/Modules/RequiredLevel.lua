@@ -1,6 +1,18 @@
 ﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
-local module = PastLoot:NewModule(L["Required Level"])
+--[[
+Checklist if creating a new module
+- first choose an existing module that most closely matches what you want to do
+- modify module_key, module_name, module_tooltip to unique values
+- make sure to update locales
+- Modify SetMatch and GetMatch
+- Create/Modify local functions as needed
+]]
+local module_key = "RequiredLevel"
+local module_name = L["Required Level"]
+local module_tooltip = L["Selected rule will only match usable items."]
+
+local module = PastLoot:NewModule(module_name)
 
 module.Choices = {
   {
@@ -32,7 +44,7 @@ module.Choices = {
 module.ConfigOptions_RuleDefaults = {
   -- { VariableName, Default },
   {
-    "RequiredLevel",
+    module_key,
     -- {
       -- [1] = { Operator, Comparison, Exception }
     -- },
@@ -52,78 +64,18 @@ function module:OnDisable()
 end
 
 function module:CreateWidget()
-  local DropDown = CreateFrame("Frame", "PastLoot_Frames_Widgets_RequiredLevelComparison", nil, "UIDropDownMenuTemplate")
-  DropDown:EnableMouse(true)
-  DropDown:SetHitRectInsets(15, 15, 0 ,0)
-  _G[DropDown:GetName().."Text"]:SetJustifyH("CENTER")
-  if ( select(4, GetBuildInfo()) < 30000 ) then
-    UIDropDownMenu_SetWidth(200, DropDown)
-  else
-    UIDropDownMenu_SetWidth(DropDown, 200)
-  end
-  DropDown:SetScript("OnEnter", function() self:ShowTooltip(L["Required Level"], L["RequiredLevel_DropDownTooltipDesc"]) end)
-  DropDown:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local DropDownButton = _G[DropDown:GetName().."Button"]
-  DropDownButton:SetScript("OnEnter", function() self:ShowTooltip(L["Required Level"], L["RequiredLevel_DropDownTooltipDesc"]) end)
-  DropDownButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local DropDownTitle = DropDown:CreateFontString(DropDown:GetName().."Title", "BACKGROUND", "GameFontNormalSmall")
-  DropDownTitle:SetParent(DropDown)
-  DropDownTitle:SetPoint("BOTTOMLEFT", DropDown, "TOPLEFT", 20, 0)
-  DropDownTitle:SetText(L["Required Level"])
-  DropDown:SetParent(nil)
-  DropDown:Hide()
-  if ( select(4, GetBuildInfo()) < 30000 ) then
-    DropDown.initialize = function(...) self:DropDown_Init(DropDown, ...) end
-  else
-    DropDown.initialize = function(...) self:DropDown_Init(...) end
-  end
-  DropDown.YPaddingTop = DropDownTitle:GetHeight()
-  DropDown.Height = DropDown:GetHeight() + DropDown.YPaddingTop
-  DropDown.XPaddingLeft = -15
-  DropDown.XPaddingRight = -15
-  DropDown.Width = DropDown:GetWidth() + DropDown.XPaddingLeft + DropDown.XPaddingRight
-  DropDown.PreferredPriority = 12
-  DropDown.Info = {
-    L["Required Level"],
-    L["Selected rule will only match items when comparing the required level to this."],
-  }
+  local frame_name = "PastLoot_Frames_Widgets_RequiredLevelComparison"
+  local DropDown = PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 
-  local DropDownEditBox = CreateFrame("EditBox", "PastLoot_Frames_Widgets_RequiredLevelDropDownEditBox")
-  DropDownEditBox:Hide()
-  DropDownEditBox:SetParent(nil)
-  DropDownEditBox:SetFontObject(ChatFontNormal)
-  DropDownEditBox:SetMaxLetters(50)  -- Was 8
-  DropDownEditBox:SetAutoFocus(true)
-  DropDownEditBox:SetScript("OnEnter", function(Frame)
-    CloseDropDownMenus(Frame:GetParent():GetParent():GetID() + 1)
-    UIDropDownMenu_StopCounting(Frame:GetParent():GetParent())
-  end)
-  DropDownEditBox:SetScript("OnEnterPressed", function(Frame)
-    self:DropDown_OnClick(Frame)  -- Calls Hide(), ClearAllPoints() and SetParent(nil)
-    -- CloseMenus() only hides the DropDownList2, not this object, and even tho i will set parent to nil, i might as well cover bases
-    CloseMenus()
-  end)
-  DropDownEditBox:SetScript("OnEscapePressed", function(Frame)
-    Frame:Hide()
-    Frame:ClearAllPoints()
-    Frame:SetParent(nil)
-    CloseMenus()
-  end)
-  DropDownEditBox:SetScript("OnEditFocusGained", function(Frame) UIDropDownMenu_StopCounting(Frame:GetParent():GetParent()) end)
-  -- DropDownEditBox:SetScript("OnHide", function(Frame)
-    -- if ( Frame:IsShown() ) then
-      -- Frame:Hide()
-    -- end
-    -- Frame:SetParent(nil)
-  -- end)
-  DropDownEditBox:SetScript("OnEditFocusLost", function(Frame) Frame:Hide() end)
+  local dropdownframe_name = "PastLoot_Frames_Widgets_RequiredLevelDropDownEditBox"
+  local DropDownEditBox = PastLoot:CreateDropDownEditBox(self, dropdownframe_name)
   return DropDown, DropDownEditBox
 end
 module.Widget, module.DropDownEditBox = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
-  local Data = module:GetConfigOption("RequiredLevel", RuleNum)
+  local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
   if ( Data ) then
     if ( type(Data) == "table" and #Data > 0 ) then
@@ -143,7 +95,7 @@ function module.Widget:GetData(RuleNum)
     end
   end
   if ( Changed ) then
-    module:SetConfigOption("RequiredLevel", Data)
+    module:SetConfigOption(module_key, Data)
   end
   return Data or {}
 end
@@ -161,7 +113,7 @@ function module.Widget:AddNewFilter()
     false
   }
   table.insert(Value, NewTable)
-  module:SetConfigOption("RequiredLevel", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:RemoveFilter(Index)
@@ -170,7 +122,7 @@ function module.Widget:RemoveFilter(Index)
   if ( #Value == 0 ) then
     Value = nil
   end
-  module:SetConfigOption("RequiredLevel", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
@@ -203,7 +155,7 @@ end
 function module.Widget:SetException(RuleNum, Index, Value)
   local Data = self:GetData(RuleNum)
   Data[Index][3] = Value
-  module:SetConfigOption("RequiredLevel", Data)
+  module:SetConfigOption(module_key, Data)
 end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
@@ -334,7 +286,7 @@ function module:DropDown_OnClick(Frame)
   end
   Value[self.FilterIndex][1] = LogicalOperator
   Value[self.FilterIndex][2] = Comparison
-  self:SetConfigOption("RequiredLevel", Value)
+  self:SetConfigOption(module_key, Value)
   if ( select(4, GetBuildInfo()) < 30000 ) then
     UIDropDownMenu_SetText(self:GetRequiredLevelText(LogicalOperator, Comparison), Frame.owner)
   else

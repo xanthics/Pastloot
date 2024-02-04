@@ -1,11 +1,24 @@
 ﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
-local module = PastLoot:NewModule(L["Item Name"])
+
+--[[
+Checklist if creating a new module
+- first choose an existing module that most closely matches what you want to do
+- modify module_key, module_name, module_tooltip to unique values
+- make sure to update locales
+- Modify SetMatch and GetMatch
+- Create/Modify local functions as needed
+]]
+local module_key = "Items"
+local module_name = L["Item Name"]
+local module_tooltip = L["Selected rule will match on item names."]
+
+local module = PastLoot:NewModule(module_name)
 
 module.ConfigOptions_RuleDefaults = {
   -- { VariableName, Default },
   {
-    "Items",
+    module_key,
     -- {
       -- [1] = { Name, Type, Exception }
     -- },
@@ -43,79 +56,14 @@ function module:OnDisable()
 end
 
 function module:CreateWidget()
-  local Widget = CreateFrame("Frame", "PastLoot_Frames_Widgets_ItemName")
-  
-  local TextBox = CreateFrame("EditBox", "PastLoot_Frames_Widgets_ItemNameTextBox")
-  TextBox:SetBackdrop({
-    ["bgFile"] = "Interface\\Tooltips\\UI-Tooltip-Background",
-    ["edgeFile"] = "Interface\\Tooltips\\UI-Tooltip-Border",
-    ["tile"] = true,
-    ["insets"] = {
-      ["top"] = 5,
-      ["bottom"] = 5,
-      ["left"] = 5,
-      ["right"] = 5,
-    },
-    ["tileSize"] = 32,
-    ["edgeSize"] = 16,
-  })
-  TextBox:SetBackdropColor(0, 0, 0, 0.95)
-  TextBox:SetFontObject(ChatFontNormal)
-  TextBox:SetTextInsets(6, 6, 6, 6)
-  TextBox:SetHeight(26)
-  TextBox:SetWidth(160)
-  TextBox:SetMaxLetters(200)
-  -- TextBox:SetHistoryLines(0)
-  TextBox:SetAutoFocus(false)
-  TextBox:SetScript("OnEnter", function() self:ShowTooltip(L["Item Name"], L["Selected rule will match on item names."]) end)
-  TextBox:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  TextBox:SetScript("OnEscapePressed", function(Frame) Frame:ClearFocus() end)
-  TextBox:SetScript("OnEditFocusGained", function(Frame) Frame:HighlightText() end)
-  TextBox:SetScript("OnEditfocusLost", function(Frame)
-    Frame:HighlightText(0, 0)
-    self.Widget:DisplayWidget()
-  end)
-  TextBox:SetScript("OnEnterPressed", function(Frame)
-    self:SetItemName(Frame)
-    Frame:ClearFocus()
-  end)
-  local Title = TextBox:CreateFontString(TextBox:GetName().."Title", "BACKGROUND", "GameFontNormalSmall")
-  Title:SetParent(TextBox)
-  Title:SetPoint("BOTTOMLEFT", TextBox, "TOPLEFT", 3, 0)
-  Title:SetText(L["Item Name"])
-  TextBox:SetParent(Widget)
-  TextBox:SetPoint("BOTTOMLEFT", Widget, "BOTTOMLEFT", 0, 0)
-  Widget.TextBox = TextBox
-  
-  local CheckBox = CreateFrame("CheckButton", "PastLoot_Frames_Widgets_ItemNameCheckBox", Widget, "UICheckButtonTemplate")
-  CheckBox:SetHeight(24)
-  CheckBox:SetWidth(24)
-  CheckBox:SetHitRectInsets(0, -60, 0, 0)
-  CheckBox:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  CheckBox:SetScript("OnClick", function(...) self:Exact_OnClick(...) end)
-  CheckBox:SetScript("OnEnter", function() self:ShowTooltip(L["Exact"], L["Exact_Desc"]) end)
-  _G[CheckBox:GetName().."Text"]:SetText(L["Exact"])
-  CheckBox:SetPoint("BOTTOMLEFT", TextBox, "BOTTOMRIGHT", 5, 0)
-  Widget.CheckBox = CheckBox
-
-  Widget:Hide()
-  Widget:SetHeight(TextBox:GetHeight())
-  Widget.YPaddingTop = Title:GetHeight() + 1
-  Widget.YPaddingBottom = 4
-  Widget.Height = Widget:GetHeight() + Widget.YPaddingTop + Widget.YPaddingBottom
-  Widget:SetWidth(TextBox:GetWidth() + 5 + CheckBox:GetWidth() + 30)
-  Widget.PreferredPriority = 14
-  Widget.Info = {
-    L["Item Name"],
-    L["Selected rule will match on item names."],
-  }
-  return Widget
+  local frame_name = "PastLoot_Frames_Widgets_ItemName"
+  return PastLoot:CreateTextBoxOptionalCheckBox(self, module_name, frame_name, module_tooltip, L["Exact"], L["Exact_Desc"])
 end
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
-  local Data = module:GetConfigOption("Items", RuleNum)
+  local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
   if ( Data ) then
     if ( type(Data) == "table" and #Data > 0 ) then
@@ -135,7 +83,7 @@ function module.Widget:GetData(RuleNum)
     end
   end
   if ( Changed ) then
-    module:SetConfigOption("Items", Data)
+    module:SetConfigOption(module_key, Data)
   end
   return Data or {}
 end
@@ -153,7 +101,7 @@ function module.Widget:AddNewFilter()
     false
   }
   table.insert(Value, NewTable)
-  module:SetConfigOption("Items", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:RemoveFilter(Index)
@@ -162,7 +110,7 @@ function module.Widget:RemoveFilter(Index)
   if ( #Value == 0 ) then
     Value = nil
   end
-  module:SetConfigOption("Items", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
@@ -195,7 +143,7 @@ end
 function module.Widget:SetException(RuleNum, Index, Value)
   local Data = self:GetData(RuleNum)
   Data[Index][3] = Value
-  module:SetConfigOption("Items", Data)
+  module:SetConfigOption(module_key, Data)
 end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
@@ -228,7 +176,7 @@ end
 function module:SetItemName(Frame)
   local Value = self.Widget:GetData()
   Value[self.FilterIndex][1] = Frame:GetText()
-  self:SetConfigOption("Items", Value)
+  self:SetConfigOption(module_key, Value)
 end
 
 function module:Exact_OnClick(Frame, Button)
@@ -238,5 +186,5 @@ function module:Exact_OnClick(Frame, Button)
   else
     Value[self.FilterIndex][2] = "Partial"
   end
-  self:SetConfigOption("Items", Value)
+  self:SetConfigOption(module_key, Value)
 end

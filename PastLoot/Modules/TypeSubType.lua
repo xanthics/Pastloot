@@ -1,6 +1,18 @@
 ﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
-local module = PastLoot:NewModule(L["Type / SubType"])
+--[[
+Checklist if creating a new module
+- first choose an existing module that most closely matches what you want to do
+- modify module_key, module_name, module_tooltip to unique values
+- make sure to update locales
+- Modify SetMatch and GetMatch
+- Create/Modify local functions as needed
+]]
+local module_key = "TypeSubType"
+local module_name = L["Type / SubType"]
+local module_tooltip = L["Selected rule will only match items with this type and subtype."]
+
+local module = PastLoot:NewModule(module_name)
 local binv, BI
 
 if ( not LibStub("LibBabble-Inventory-3.0", true) ) then
@@ -605,10 +617,8 @@ function module:SetupValues()
 end
 module.ConfigOptions_RuleDefaults = {
   -- { VariableName, Default },
-  { "Type", nil }, -- No longer used
-  { "SubType", nil }, -- No longer used
   {
-    "TypeSubType",
+    module_key,
     -- {
       -- [1] = { Type, SubType, Exception }
     -- },
@@ -630,48 +640,14 @@ function module:OnDisable()
 end
 
 function module:CreateWidget()
-  local Widget = CreateFrame("Frame", "PastLoot_Frames_Widgets_TypeSubType", nil, "UIDropDownMenuTemplate")
-  Widget:EnableMouse(true)
-  Widget:SetHitRectInsets(15, 15, 0 ,0)
-  _G[Widget:GetName().."Text"]:SetJustifyH("CENTER")
-  if ( select(4, GetBuildInfo()) < 30000 ) then
-    UIDropDownMenu_SetWidth(220, Widget)
-  else
-    UIDropDownMenu_SetWidth(Widget, 220)
-  end
-  Widget:SetScript("OnEnter", function() self:ShowTooltip(L["Type / SubType"], L["Selected rule will only match items with this type and subtype."]) end)
-  Widget:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local Button = _G[Widget:GetName().."Button"]
-  Button:SetScript("OnEnter", function() self:ShowTooltip(L["Type / SubType"], L["Selected rule will only match items with this type and subtype."]) end)
-  Button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  local Title = Widget:CreateFontString(Widget:GetName().."Title", "BACKGROUND", "GameFontNormalSmall")
-  Title:SetParent(Widget)
-  Title:SetPoint("BOTTOMLEFT", Widget, "TOPLEFT", 20, 0)
-  Title:SetText(L["Type / SubType"])
-  Widget:SetParent(nil)
-  Widget:Hide()
-  if ( select(4, GetBuildInfo()) < 30000 ) then
-    Widget.initialize = function(...) self:DropDown_Init(Widget, ...) end
-  else
-    Widget.initialize = function(...) self:DropDown_Init(...) end
-  end
-  Widget.YPaddingTop = Title:GetHeight()
-  Widget.Height = Widget:GetHeight() + Widget.YPaddingTop
-  Widget.XPaddingLeft = -15
-  Widget.XPaddingRight = -15
-  Widget.Width = Widget:GetWidth() + Widget.XPaddingLeft + Widget.XPaddingRight
-  Widget.PreferredPriority = 9
-  Widget.Info = {
-    L["Type / SubType"],
-    L["Selected rule will only match items with this type and subtype."],
-  }
-  return Widget
+  local frame_name = "PastLoot_Frames_Widgets_TypeSubType"
+  return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
 module.Widget = module:CreateWidget()
 
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
-  local Data = module:GetConfigOption("TypeSubType", RuleNum)
+  local Data = module:GetConfigOption(module_key, RuleNum)
   local Changed = false
   if ( Data ) then
     if ( type(Data) == "table" and #Data > 0 ) then
@@ -713,7 +689,7 @@ function module.Widget:GetData(RuleNum)
     end
   end
   if ( Changed ) then
-    module:SetConfigOption("TypeSubType", Data)
+    module:SetConfigOption(module_key, Data)
   end
   return Data or {}
 end
@@ -731,7 +707,7 @@ function module.Widget:AddNewFilter()
     false
   }
   table.insert(Value, NewTable)
-  module:SetConfigOption("TypeSubType", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:RemoveFilter(Index)
@@ -740,7 +716,7 @@ function module.Widget:RemoveFilter(Index)
   if ( #Value == 0 ) then
     Value = nil
   end
-  module:SetConfigOption("TypeSubType", Value)
+  module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
@@ -772,7 +748,7 @@ end
 function module.Widget:SetException(RuleNum, Index, Value)
   local Data = self:GetData(RuleNum)
   Data[Index][3] = Value
-  module:SetConfigOption("TypeSubType", Data)
+  module:SetConfigOption(module_key, Data)
 end
 
 function module.Widget:SetMatch(ItemLink, Tooltip)
@@ -866,7 +842,7 @@ function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   Value[self.FilterIndex][1] = Frame.value.Type
   Value[self.FilterIndex][2] = Frame.value.SubType
-  self:SetConfigOption("TypeSubType", Value)
+  self:SetConfigOption(module_key, Value)
   if ( select(4, GetBuildInfo()) < 30000 ) then
     UIDropDownMenu_SetText(self:GetTypeSlotText(Frame.value.Type, Frame.value.SubType), Frame.owner)
   else
