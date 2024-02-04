@@ -28,10 +28,15 @@ module.Choices = { {
 	["Value"] = 4,
 } }
 
-module.ConfigOptions_RuleDefaults = { -- { VariableName, Default },
-	{ module_key, {
+module.ConfigOptions_RuleDefaults = {
+	-- { VariableName, Default },
+	{
+		module_key,
+		-- {
 		-- [1] = { Value, Exception }
-	} } }
+		-- },
+	},
+}
 module.NewFilterValue = 1
 
 function module:OnEnable()
@@ -84,6 +89,9 @@ end
 function module.Widget:RemoveFilter(Index)
 	local Value = self:GetData()
 	table.remove(Value, Index)
+	if (#Value == 0) then
+		Value = nil
+	end
 	module:SetConfigOption(module_key, Value)
 end
 

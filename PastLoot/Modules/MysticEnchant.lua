@@ -37,10 +37,15 @@ module.Choices = { {
 	["Value"] = 7,
 } }
 
-module.ConfigOptions_RuleDefaults = { -- { VariableName, Default },
-	{ module_key, {
+module.ConfigOptions_RuleDefaults = {
+	-- { VariableName, Default },
+	{
+		module_key,
+		-- {
 		-- [1] = { Value, Exception }
-	} } }
+		-- },
+	},
+}
 module.NewFilterValue = 1
 
 function module:OnEnable()
@@ -93,6 +98,9 @@ end
 function module.Widget:RemoveFilter(Index)
 	local Value = self:GetData()
 	table.remove(Value, Index)
+	if (#Value == 0) then
+		Value = nil
+	end
 	module:SetConfigOption(module_key, Value)
 end
 
@@ -147,7 +155,7 @@ function module.Widget:GetMatch(RuleNum, Index)
 	local RuleID = RuleValue[Index][1]
 
 	if module.CurrentMatch > 0 then
-		if (RuleID == 1) or                         -- any RE
+		if (RuleID == 1) or                          -- any RE
 			(RuleID == 4 and module.CurrentMatch == 3) or -- wre known
 			(RuleID == 5 and module.CurrentMatch == 4) or -- wre unknown
 			(RuleID == 6 and module.CurrentMatch == 1) or -- non-wre known
