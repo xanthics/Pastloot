@@ -310,7 +310,7 @@ local function update_sets()
 end
 
 local function BAG_OPEN(...)
-  PastLoot:OpenInventoryGui()
+--  PastLoot:OpenInventoryGui()
 end
 
 local function BAG_CLOSE(...)
