@@ -130,10 +130,9 @@ function module.Widget:SetException(RuleNum, Index, Value)
 	module:SetConfigOption("Unowned", Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
+function module.Widget:SetMatch(itemObj, Tooltip)
 	local Owned = 0 -- 0 means not an RE
-	local itemID = GetItemInfoFromHyperlink(ItemLink)
-	local enchant = C_MysticEnchant.GetEnchantInfoByItem(itemID)
+	local enchant = C_MysticEnchant.GetEnchantInfoByItem(itemObj.id)
 
 	if enchant then
 		if enchant.Known then
@@ -147,7 +146,7 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
 	end
 
 	module.CurrentMatch = Owned
-	module:Debug("MysticEnchant: " .. Owned .. " (" .. itemID .. ")")
+	module:Debug("MysticEnchant: " .. Owned .. " (" .. itemObj.link .. ")")
 end
 
 function module.Widget:GetMatch(RuleNum, Index)

@@ -118,11 +118,10 @@ function module.Widget:SetException(RuleNum, Index, Value)
 	module:SetConfigOption("Unowned", Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
+function module.Widget:SetMatch(itemObj, Tooltip)
 	local Owned = 0
-	local itemID = GetItemInfoFromHyperlink(ItemLink)
-	if VANITY_ITEMS[itemID] then
-		if C_VanityCollection.IsCollectionItemOwned(itemID) then
+	if VANITY_ITEMS[itemObj.id] then
+		if C_VanityCollection.IsCollectionItemOwned(itemObj.id) then
 			Owned = 2
 		else
 			Owned = 3
@@ -130,7 +129,7 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
 	end
 
 	module.CurrentMatch = Owned
-	module:Debug("Vanity: " .. Owned .. " (" .. itemID .. ")")
+	module:Debug("Vanity: " .. Owned .. " (" .. itemObj.link .. ")")
 end
 
 function module.Widget:GetMatch(RuleNum, Index)

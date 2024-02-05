@@ -121,8 +121,8 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  module.CurrentMatch = select(3, ItemLink:find("item:(%d-):"))
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = itemObj.id
   module:Debug("Item ID: " .. (module.CurrentMatch or ""))
 end
 

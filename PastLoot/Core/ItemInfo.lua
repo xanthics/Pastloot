@@ -5,7 +5,7 @@ local function fillItemInfo(item)
 	item.name = name
 	item.quality = quality
 	item.iLevel = iLevel
-	item.reqLevel = reqLevel
+	item.reqLevel = reqLevel or 0
 	item.class = class
 	item.subclass = subclass
 	item.maxStack = maxStack

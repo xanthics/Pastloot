@@ -1,5 +1,6 @@
 ﻿local VERSION = "4.1 r135"
-PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0", "LibSink-2.0")
+PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0",
+  "LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 -- local LDBIcon = LibStub("LibDBIcon-1.0")
@@ -14,8 +15,8 @@ local defaults = {
     ["Modules"] = {},
     ["SinkOptions"] = {},
     -- ["WindowPos"] = {  -- Unused after moving Everything to Blizz Options Frame
-      -- ["X"] = nil,
-      -- ["Y"] = nil,
+    -- ["X"] = nil,
+    -- ["Y"] = nil,
     -- },
     ["SkipRules"] = false,
     ["SkipWarning"] = true,
@@ -49,12 +50,13 @@ PastLoot.OptionsTable = {
       ["type"] = "input",
       ["get"] = function() end,
       ["set"] = function(info, value)
-        _, PastLoot.TestLink = GetItemInfo(value)
-        if ( PastLoot.TestLink ) then
+        local _, link = GetItemInfo(value)
+        PastLoot.TestLink = PastLoot:InitItem(link)
+        if (PastLoot.TestLink) then
           PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
           PastLoot:EvaluateItem(PastLoot.TestLink)
         else
-          PastLoot.TestLink = nil  -- to make sure
+          PastLoot.TestLink = nil -- to make sure
         end
       end,
     },
@@ -64,17 +66,14 @@ PastLoot.OptionsTable = {
       ["type"] = "input",
       ["get"] = function() end,
       ["set"] = function(info)
-        for bag=0,4 do
-          for slot=1, GetContainerNumSlots(bag) do
-            local itemLink = GetContainerItemLink(bag,slot)
-            if itemLink then
-              _, PastLoot.TestLink = GetItemInfo(itemLink)
-              if ( PastLoot.TestLink ) then
-                PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
-                PastLoot:EvaluateItem(PastLoot.TestLink)
-              else
-                PastLoot.TestLink = nil  -- to make sure
-              end
+        for bag = 0, 4 do
+          for slot = 1, GetContainerNumSlots(bag) do
+            PastLoot.TestLink = PastLoot:FillContainerItemInfo(nil, bag, slot)
+            if (PastLoot.TestLink) then
+              PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
+              PastLoot:EvaluateItem(PastLoot.TestLink)
+            else
+              PastLoot.TestLink = nil   -- to make sure
             end
           end
         end
@@ -92,7 +91,7 @@ PastLoot.OptionsTable = {
           ["order"] = 0,
           ["get"] = "IsEnabled",
           ["set"] = function(info, v)
-            if ( v ) then
+            if (v) then
               PastLoot:Enable()
             else
               PastLoot:Disable()
@@ -144,7 +143,8 @@ PastLoot.OptionsTable = {
         },
         ["AllowMultipleConfirmPopups"] = {
           ["name"] = L["Allow Multiple Confirm Popups"],
-          ["desc"] = L["Checking this will disable the exclusive bit to allow multiple confirmation of loot roll popups"],
+          ["desc"] = L
+          ["Checking this will disable the exclusive bit to allow multiple confirmation of loot roll popups"],
           ["type"] = "toggle",
           ["order"] = 20,
           ["arg"] = { "AllowMultipleConfirmPopups" },
@@ -153,7 +153,7 @@ PastLoot.OptionsTable = {
             PastLoot:SetExclusiveConfirmPopupBit()
           end,
           ["width"] = "full",
-          ["disabled"] = function(info, value) return not StaticPopupDialogs.CONFIRM_LOOT_ROLL end,  -- Some versions of WoW (or addons that remove) don't have CONFIRM_LOOT_ROLL
+          ["disabled"] = function(info, value) return not StaticPopupDialogs.CONFIRM_LOOT_ROLL end, -- Some versions of WoW (or addons that remove) don't have CONFIRM_LOOT_ROLL
         },
         ["SkipRules"] = {
           ["name"] = L["Skip Rules"],
@@ -196,12 +196,12 @@ PastLoot.OptionsTable = {
       ["type"] = "group",
       ["args"] = {},
     },
-    ["Profiles"] = nil,  -- Reserved for profile options
-    ["Output"] = nil,  -- Reserved for sink output options
+    ["Profiles"] = nil, -- Reserved for profile options
+    ["Output"] = nil,   -- Reserved for sink output options
   },
 }
 
-  -- A list of variables that are used in the DefaultTemplate (this is a quick lookup table of what variables are used)
+-- A list of variables that are used in the DefaultTemplate (this is a quick lookup table of what variables are used)
 PastLoot.DefaultVars = {
   -- [VariableName] = true,
 }
@@ -209,7 +209,7 @@ PastLoot.DefaultVars = {
 function PastLoot:OptionsSet(Info, Value)
   local Table = self.db.profile
   for Key = 1, (#Info.arg - 1) do
-    if ( not Table[Info.arg[Key]] ) then
+    if (not Table[Info.arg[Key]]) then
       Table[Info.arg[Key]] = {}
     end
     Table = Table[Info.arg[Key]]
@@ -220,7 +220,7 @@ end
 function PastLoot:OptionsGet(Info)
   local Table = self.db.profile
   for Key = 1, (#Info.arg - 1) do
-    if ( not Table[Info.arg[Key]] ) then
+    if (not Table[Info.arg[Key]]) then
       Table[Info.arg[Key]] = {}
     end
     Table = Table[Info.arg[Key]]
@@ -229,12 +229,12 @@ function PastLoot:OptionsGet(Info)
 end
 
 function PastLoot:SetExclusiveConfirmPopupBit()
-  if ( StaticPopupDialogs and StaticPopupDialogs.CONFIRM_LOOT_ROLL ) then  -- Some versions of WoW (or addons that remove) don't have CONFIRM_LOOT_ROLL
-    if ( self.db.profile.AllowMultipleConfirmPopups ) then
+  if (StaticPopupDialogs and StaticPopupDialogs.CONFIRM_LOOT_ROLL) then   -- Some versions of WoW (or addons that remove) don't have CONFIRM_LOOT_ROLL
+    if (self.db.profile.AllowMultipleConfirmPopups) then
       StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive = nil
       StaticPopupDialogs.CONFIRM_LOOT_ROLL.multiple = 1
     else
-      if ( not StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive ) then  -- Only modify this if we touched it.
+      if (not StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive) then   -- Only modify this if we touched it.
         StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive = 1
         StaticPopupDialogs.CONFIRM_LOOT_ROLL.multiple = nil
       end
@@ -255,7 +255,7 @@ function PastLoot:OnInitialize()
 
   self.OptionsTable.args.Profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
   self.OptionsTable.args.Output = self:GetSinkAce3OptionsDataTable()
-  LibStub("AceConfig-3.0"):RegisterOptionsTable(L["PastLoot"], self.OptionsTable, {L["PASTLOOT_SLASH_COMMAND"]})
+  LibStub("AceConfig-3.0"):RegisterOptionsTable(L["PastLoot"], self.OptionsTable, { L["PASTLOOT_SLASH_COMMAND"] })
   -- Ability_Racial_PackHobgoblin
   -- INV_Misc_Bag_10
   -- INV_Misc_Coin_02
@@ -267,14 +267,14 @@ function PastLoot:OnInitialize()
       InterfaceOptionsFrame_OpenToCategory(L["PastLoot"])
     end,
     ["OnTooltipShow"] = function(tooltip)
-      if ( tooltip and tooltip.AddLine ) then
+      if (tooltip and tooltip.AddLine) then
         tooltip:SetText(L["PastLoot"])
         for Key, Value in ipairs(self.LastRolls) do
           tooltip:AddLine(Value)
         end
         tooltip:Show()
       end
-    end,            
+    end,
   })
 
   -- self.MainFrame = self:Create_MainFrame()
@@ -284,11 +284,13 @@ function PastLoot:OnInitialize()
   -- self.BlizOptionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("PastLoot", L["PastLoot"])
   self.BlizOptionsFrames = {
     ["Modules"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Modules"], L["PastLoot"], "Modules"),
-    ["GeneralOptions"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Options"], L["PastLoot"], "Options"),
-    ["Profiles"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Profiles"], L["PastLoot"], "Profiles"),
+    ["GeneralOptions"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Options"], L["PastLoot"],
+      "Options"),
+    ["Profiles"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Profiles"], L["PastLoot"],
+      "Profiles"),
     ["Output"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Output"], L["PastLoot"], "Output"),
   }
-  
+
   -- PanelTemplates_SetNumTabs(PastLoot_TabbedMenuContainer, 2)  -- 2 because there are 2 tabs total.
   -- PanelTemplates_SetTab(PastLoot_TabbedMenuContainer, 1)      -- 1 because we want tab 1 selected.
   -- PanelTemplates_UpdateTabs(PastLoot_TabbedMenuContainer)
@@ -297,9 +299,9 @@ end
 
 local function update_sets()
   PastLoot.setIDs = {} -- clear any existing set items
-  for i=1, GetNumEquipmentSets() do
+  for i = 1, GetNumEquipmentSets() do
     local name = GetEquipmentSetInfo(i)
-    for _,v in pairs(GetEquipmentSetItemIDs(name)) do
+    for _, v in pairs(GetEquipmentSetItemIDs(name)) do
       if v > 1 then
         PastLoot.setIDs[v] = true
       end
@@ -324,15 +326,15 @@ function PastLoot:OnEnable()
   self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
 
   self:SecureHook("OpenAllBags", BAG_OPEN)
-	self:SecureHook("OpenBackpack", BAG_OPEN)
-	self:SecureHook("CloseAllBags", BAG_CLOSE)
-	self:SecureHook("CloseBackpack", BAG_CLOSE)
-	-- self:SecureHook("ToggleBag", "BAG_TOGGLE")
-	-- self:SecureHook("ToggleBackpack", "BAG_TOGGLE")
+  self:SecureHook("OpenBackpack", BAG_OPEN)
+  self:SecureHook("CloseAllBags", BAG_CLOSE)
+  self:SecureHook("CloseBackpack", BAG_CLOSE)
+  -- self:SecureHook("ToggleBag", "BAG_TOGGLE")
+  -- self:SecureHook("ToggleBackpack", "BAG_TOGGLE")
   update_sets()
   self:SetupModulesOptionsTables() -- Creates Module header frames and lays them out in the scroll frame
   self:OnProfileChanged()
-  self.LastRolls = {}  -- Last 10 rolls.
+  self.LastRolls = {}              -- Last 10 rolls.
 end
 
 function PastLoot:OnDisable()
@@ -365,11 +367,11 @@ function PastLoot:LoadModules()
   for ModuleKey, ModuleValue in self:IterateModules() do
     Module = ModuleValue:GetName()
     self.db.profile.Modules[Module] = self.db.profile.Modules[Module] or {}
-    if ( self.db.profile.Modules[Module].Status == nil ) then
+    if (self.db.profile.Modules[Module].Status == nil) then
       self.db.profile.Modules[Module].Status = true
     end
-    if ( self.db.profile.Modules[Module].Status ~= ModuleValue.enabledState ) then
-      if ( self.db.profile.Modules[Module].Status ) then
+    if (self.db.profile.Modules[Module].Status ~= ModuleValue.enabledState) then
+      if (self.db.profile.Modules[Module].Status) then
         ModuleValue:Enable()
       else
         ModuleValue:Disable()
@@ -377,12 +379,6 @@ function PastLoot:LoadModules()
     end
   end
 end
-
-local CanRoll = {
-  ["keep"] = nil,
-  ["vendor"] = nil,
-  ["destroy"] = nil,
-}
 
 local RollMethodLookup = {
   [1] = L["Keep"],
@@ -398,34 +394,35 @@ end
 function PastLoot:BAG_UPDATE(Event, Bag, ...)
   if Event ~= "BAG_UPDATE" or Bag == nil or Bag < 0 or Bag > 4 then return end
   -- throttle bag updates
---  print("Bag update")
+  PastLoot.InventoryCache = nil
+  --  print("Bag update")
 end
+
 function PastLoot:MERCHANT_SHOW(Event, ...)
   if Event ~= "MERCHANT_SHOW" or "Fix-o-Tron 5000" == UnitName("target") then return end
   local _, sold
   local amount = 0
-  for bag=0,4 do
-    for slot=1, GetContainerNumSlots(bag) do
-      local _, count, _, _, _, _, itemLink = GetContainerItemInfo(bag,slot)
-      if itemLink then
-        local vendor = select(11, GetItemInfo(itemLink))
-        if vendor > 0 then
-          local result = PastLoot:EvaluateItem(itemLink)
+  for bag = 0, 4 do
+    for slot = 1, GetContainerNumSlots(bag) do
+      local itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
+      if itemObj then
+        if itemObj.vendorPrice > 0 then
+          local result = PastLoot:EvaluateItem(itemObj)
           if result == 2 or result == 3 then
-            amount = amount + count * vendor
-            if sold and strlen(sold) + strlen(itemLink) > 255 then
+            amount = amount + itemObj.count * itemObj.vendorPrice
+            if sold and strlen(sold) + strlen(itemObj.link) > 255 then
               print("Sold: " .. sold)
               sold = nil
             end
-          -- only show count if > 1
-          local c = ""
-          if count > 1 then
-            c = count .. "x "
-          end
-          if sold then
-              sold = sold .. ", ".. c .. itemLink
+            -- only show count if > 1
+            local c = ""
+            if itemObj.count > 1 then
+              c = itemObj.count .. "x "
+            end
+            if sold then
+              sold = sold .. ", " .. c .. itemObj.link
             else
-              sold = c .. itemLink
+              sold = c .. itemObj.link
             end
             UseContainerItem(bag, slot)
           end
@@ -435,33 +432,34 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
   end
   if sold then
     print("Sold: " .. sold)
-    print("Total: "..GetCoinTextureString(amount))
+    print("Total: " .. GetCoinTextureString(amount))
   end
 end
 
-function PastLoot:EvaluateItem(ItemLink)
-  local Name = GetItemInfo(ItemLink)
+function PastLoot:EvaluateItem(itemObj)
+  local Name = itemObj.name
   PastLootTT:ClearLines()
-  PastLootTT:SetHyperlink(ItemLink)
+  PastLootTT:SetHyperlink(itemObj.link)
   for WidgetKey, WidgetValue in ipairs(self.RuleWidgets) do
-    WidgetValue:SetMatch(ItemLink, PastLootTT)
+    WidgetValue:SetMatch(itemObj, PastLootTT)
   end
   local MatchedRule, NumFilters
   local IsMatch, IsException, NormalMatch, ExceptionMatch, HadNoNormal
   local NormalMatchText, ExceptionMatchText = "", ""
   for RuleKey, RuleValue in ipairs(self.db.profile.Rules) do
-    self:Debug("Checking rule "..RuleKey.." "..RuleValue.Desc)
-    if ( self.db.profile.SkipRules and self.SkipRules[RuleKey] ) then
-      if ( self.db.profile.SkipWarning ) then
-        self:Pour("|cff33ff99"..L["PastLoot"].."|r: "..string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
+    self:Debug("Checking rule " .. RuleKey .. " " .. RuleValue.Desc)
+    if (self.db.profile.SkipRules and self.SkipRules[RuleKey]) then
+      if (self.db.profile.SkipWarning) then
+        self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " ..
+        string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
       end
     else
       MatchedRule = true
       for WidgetKey, WidgetValue in ipairs(self.RuleWidgets) do
         NumFilters = WidgetValue:GetNumFilters(RuleKey) or 0
-        if ( NumFilters > 0 ) then
+        if (NumFilters > 0) then
           NormalMatchText, ExceptionMatchText = "", ""
-          self:Debug("Checking filter "..WidgetValue.Info[1].." ("..NumFilters.." NumFilters)")
+          self:Debug("Checking filter " .. WidgetValue.Info[1] .. " (" .. NumFilters .. " NumFilters)")
           -- I can not simply OR normal ones and AND NOT the exception ones.. example: for a 1hd mace
           -- Filter1: OR Armor
           -- Filter2: AND NOT 1hd mace
@@ -473,35 +471,37 @@ function PastLoot:EvaluateItem(ItemLink)
           HadNoNormal = true
           for Index = 1, NumFilters do
             IsMatch = WidgetValue:GetMatch(RuleKey, Index)
-            if ( IsMatch ) then
+            if (IsMatch) then
               IsMatch = true
             else
               IsMatch = false
             end
             IsException = WidgetValue:IsException(RuleKey, Index)
-            if ( IsException ) then
+            if (IsException) then
               ExceptionMatch = ExceptionMatch or IsMatch
-              ExceptionMatchText = ExceptionMatchText..Index.."-"..tostring(IsMatch).." OR "
-              if ( IsMatch ) then  -- don't have to go any further, one single true in the exception = a false in the entire filter.
+              ExceptionMatchText = ExceptionMatchText .. Index .. "-" .. tostring(IsMatch) .. " OR "
+              if (IsMatch) then   -- don't have to go any further, one single true in the exception = a false in the entire filter.
                 break
               end
             else
               NormalMatch = NormalMatch or IsMatch
               HadNoNormal = false
-              NormalMatchText = NormalMatchText..Index.."-"..tostring(IsMatch).." OR "
+              NormalMatchText = NormalMatchText .. Index .. "-" .. tostring(IsMatch) .. " OR "
             end
           end -- Each Filter
-          if ( (NormalMatch or HadNoNormal) and not ExceptionMatch ) then
-            self:Debug("Filter matched: ("..NormalMatchText..tostring(HadNoNormal)..") AND NOT ("..ExceptionMatchText.." false)")
+          if ((NormalMatch or HadNoNormal) and not ExceptionMatch) then
+            self:Debug("Filter matched: (" ..
+            NormalMatchText .. tostring(HadNoNormal) .. ") AND NOT (" .. ExceptionMatchText .. " false)")
           else
-            self:Debug("Filter did not match: ("..NormalMatchText..tostring(HadNoNormal)..") AND NOT ("..ExceptionMatchText.." false)")
+            self:Debug("Filter did not match: (" ..
+            NormalMatchText .. tostring(HadNoNormal) .. ") AND NOT (" .. ExceptionMatchText .. " false)")
             MatchedRule = false
             break
           end
         end -- NumFilters > 0
-      end -- Each Widget
+      end   -- Each Widget
 
-      if ( MatchedRule ) then
+      if (MatchedRule) then
         self:Debug("Matched rule")
         local StatusMsg, RollMethod
         StatusMsg = self.db.profile.MessageText.ignore
@@ -518,54 +518,53 @@ function PastLoot:EvaluateItem(ItemLink)
           end
         end
         -- for LootKey, LootValue in ipairs(RuleValue.Loot) do
-          -- if ( CanRoll[LootValue] ) then
-            -- RollMethod = self.RollMethod[LootValue]
-            -- StatusMsg = self.db.profile.MessageText[LootValue]
-            -- break
-          -- end
+        -- if ( CanRoll[LootValue] ) then
+        -- RollMethod = self.RollMethod[LootValue]
+        -- StatusMsg = self.db.profile.MessageText[LootValue]
+        -- break
         -- end
-        self:SendMessage("PastLoot_OnRoll", ItemLink, RuleKey, RollMethod)  -- Maybe change this to OnRuleMatched
-        if ( not self.TestLink ) then
-          if ( RollMethod ) then
+        -- end
+        self:SendMessage("PastLoot_OnRoll", itemObj.link, RuleKey, RollMethod) -- Maybe change this to OnRuleMatched
+        if (not self.TestLink) then
+          if (RollMethod) then
             -- RollOnLoot(RollID, RollMethod)
             return RollMethod, RuleKey
           end
         end
         -- Add to LastRolls
         local ItemTexture, TextLine, Method
-        if ( RollMethod ) then
+        if (RollMethod) then
           Method = RollMethodLookup[RollMethod]
         else
           Method = L["Ignored"]
         end
-        _, _, _, _, _, _, _, _, _, ItemTexture, _ = GetItemInfo(ItemLink)
-        TextLine = string.format("|T%s:0|t %s - %s", ItemTexture, ItemLink, Method)
-        if ( #self.LastRolls == 10 ) then
+        TextLine = string.format("|T%s:0|t %s - %s", itemObj.texture, itemObj.link, Method)
+        if (#self.LastRolls == 10) then
           table.remove(self.LastRolls, 1)
         end
         table.insert(self.LastRolls, TextLine)
         -- Send StatusMsg
-        if ( self.db.profile.Quiet == false ) then
+        if (self.db.profile.Quiet == false) then
           -- Workaround for LibSink.  It can handle |c and |r color stuff, but not full ItemLinks
           local ItemText
-          if ( self.db.profile.SinkOptions.sink20OutputSink == "Channel" ) then
-            ItemText = GetItemInfo(ItemLink)
+          if (self.db.profile.SinkOptions.sink20OutputSink == "Channel") then
+            ItemText = itemObj.name
           else
-            ItemText = ItemLink
+            ItemText = itemObj.link
           end
           StatusMsg = string.gsub(StatusMsg, "%%item%%", ItemText)
           StatusMsg = string.gsub(StatusMsg, "%%rule%%", RuleValue.Desc)
-          self:Pour("|cff33ff99"..L["PastLoot"].."|r: "..StatusMsg)
+          self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " .. StatusMsg)
         end
         self.TestLink = nil
         return
       end --MatchedRule
-    end  -- SkipRules
+    end   -- SkipRules
     self:Debug("Rule not matched, trying another")
-  end --RuleKey, RuleValue
+  end     --RuleKey, RuleValue
   self:Debug("Ran out of rules, ignoring")
-  if ( self.TestLink ) then
-    self:Pour(ItemLink..": "..L["No rules matched."])
+  if (self.TestLink) then
+    self:Pour(itemObj.link .. ": " .. L["No rules matched."])
   end
   self.TestLink = nil
 end
@@ -573,11 +572,11 @@ end
 function PastLoot:CleanRules()
   -- local DefaultVars = {}
   -- for DefaultKey, DefaultValue in pairs(self.DefaultTemplate) do
-    -- DefaultVars[DefaultValue[1]] = true
+  -- DefaultVars[DefaultValue[1]] = true
   -- end
   for RuleKey, RuleValue in pairs(self.db.profile.Rules) do
     for VarKey, VarValue in pairs(RuleValue) do
-      if ( not self.DefaultVars[VarKey] ) then
+      if (not self.DefaultVars[VarKey]) then
         self.db.profile.Rules[RuleKey][VarKey] = nil
       end
     end
@@ -601,54 +600,54 @@ function PastLoot:CheckRuleTables()
   for RuleKey, RuleValue in pairs(self.db.profile.Rules) do
     for DefaultKey, DefaultValue in ipairs(self.DefaultTemplate) do
       -- Check if the rule does not have a variable but the default template says we should.
-      if ( not RuleValue[DefaultValue[1]] and DefaultValue[2] ) then
+      if (not RuleValue[DefaultValue[1]] and DefaultValue[2]) then
         self.db.profile.Rules[RuleKey][DefaultValue[1]] = self:CopyTable(DefaultValue[2])
       end
     end
     -- Check each variable to see if it's listed in the DefaultTemplate
     for VarKey, VarValue in pairs(RuleValue) do
-      if ( not self.DefaultVars[VarKey] ) then
-        self:Debug("Could not find some variables in rule "..RuleValue.Desc)
+      if (not self.DefaultVars[VarKey]) then
+        self:Debug("Could not find some variables in rule " .. RuleValue.Desc)
         self.SkipRules[RuleKey] = true
         RulesSkipped = true
         break
       end
     end
   end
-  if ( RulesSkipped and self.db.profile.SkipRules ) then
-    self:Pour("|cff33ff99"..L["PastLoot"].."|r: "..L["Found some rules that will be skipped."])
+  if (RulesSkipped and self.db.profile.SkipRules) then
+    self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " .. L["Found some rules that will be skipped."])
   end
 end
 
 function PastLoot:Debug(...)
   local DebugLine, Counter
-  if ( self.DebugVar == true ) then
+  if (self.DebugVar == true) then
     DebugLine = ""
     for Counter = 1, select("#", ...) do
-      DebugLine = DebugLine..select(Counter, ...)
+      DebugLine = DebugLine .. select(Counter, ...)
     end
     self:Print(DebugLine)
   end
 end
 
 function PastLoot:IterateRules(CallbackFunc, ...)
-  if ( PastLootDB and PastLootDB.profiles ) then
+  if (PastLootDB and PastLootDB.profiles) then
     for ProfileKey, ProfileValue in pairs(PastLootDB.profiles) do
-      if ( ProfileValue.Rules ) then
+      if (ProfileValue.Rules) then
         for RuleKey, RuleValue in ipairs(ProfileValue.Rules) do
-          if ( type(CallbackFunc) == "string" ) then
+          if (type(CallbackFunc) == "string") then
             self[CallbackFunc](self, RuleValue, ...)
-          elseif ( type(CallbackFunc) == "function" ) then
+          elseif (type(CallbackFunc) == "function") then
             CallbackFunc(RuleValue, ...)
           end
         end -- RuleKey, RuleValue
-      end -- if ProfileValue.Rules
-    end -- ProfileKey, ProfileValue
-  elseif ( self.db and self.db.profile and self.db.profile.Rules ) then
+      end   -- if ProfileValue.Rules
+    end     -- ProfileKey, ProfileValue
+  elseif (self.db and self.db.profile and self.db.profile.Rules) then
     for RuleKey, RuleValue in ipairs(self.db.profile.Rules) do
-      if ( type(CallbackFunc) == "string" ) then
+      if (type(CallbackFunc) == "string") then
         self[CallbackFunc](self, RuleValue, ...)
-      elseif ( type(CallbackFunc) == "function" ) then
+      elseif (type(CallbackFunc) == "function") then
         CallbackFunc(RuleValue, ...)
       end
     end -- RuleKey, RuleValue
@@ -659,71 +658,71 @@ end
 -- ## Main PastLoot DB structure ##
 -- DB Version 12 structure:
 -- PastLoot Global = {
-  -- ["Modules"] = {
-    -- ["ModuleName"] = {
-      -- ["Version"] = 1,
-    -- },
-  -- },
+-- ["Modules"] = {
+-- ["ModuleName"] = {
+-- ["Version"] = 1,
+-- },
+-- },
 -- }
 -- PastLoot Profile = {
-  -- ["Quiet"] = false,
-  -- ["Rules"] = {
-    -- {
-      -- ["Desc"] = "Description",
-      -- ["ModuleVar"] = ModuleValue,
-      -- ["ModuleVar"] = ModuleValue,
-    -- },
-  -- },
-  -- ["Modules"] = {
-    -- ["ModuleName"] = {
-      -- ["Status"] = true/false,
-      -- ["ProfileVars"] = {},
-    -- },
-  -- },
+-- ["Quiet"] = false,
+-- ["Rules"] = {
+-- {
+-- ["Desc"] = "Description",
+-- ["ModuleVar"] = ModuleValue,
+-- ["ModuleVar"] = ModuleValue,
+-- },
+-- },
+-- ["Modules"] = {
+-- ["ModuleName"] = {
+-- ["Status"] = true/false,
+-- ["ProfileVars"] = {},
+-- },
+-- },
 -- }
 
 -- ## Table format of Default Template when creating a new rule ##
 -- # Also the format for registering the variables
 -- PastLoot.DefaultTemplate = {
-  -- { VariableName, Default },
-  -- { VariableName, Default },
+-- { VariableName, Default },
+-- { VariableName, Default },
 -- }
 
 -- ## Plugin Lookup Table ##
 -- This is a lookup only table, we do not delete entries from this table generated
 -- # RuleVariables are created when a module uses RegisterDefaultVariables()
-    -- Used as verification, as the only variables our module can access with GetConfigOption() and SetConfigOption()
-    -- Also used in CheckDBVersion, as a list of variables to upgrade with the Callback function.
+-- Used as verification, as the only variables our module can access with GetConfigOption() and SetConfigOption()
+-- Also used in CheckDBVersion, as a list of variables to upgrade with the Callback function.
 -- # RuleWidgets are created when a module uses AddWidget()
-    -- Used as a list of widgets to remove from the PastLoot.RuleWidgets table.
-    -- (PastLoot.RuleWidgets is a sorted table of all widgets to display)
+-- Used as a list of widgets to remove from the PastLoot.RuleWidgets table.
+-- (PastLoot.RuleWidgets is a sorted table of all widgets to display)
 -- PastLoot.PluginInfo = {
-  -- [ModuleName] = {
-    -- ["RuleVariables"] = {
-      -- VariableName = true,
-      -- VariableName = true,
-    -- },
-    -- ["RuleWidgets"] = {
-      -- [1] = WidgetA,
-      -- [2] = WidgetB,
-    -- },
-  -- },
+-- [ModuleName] = {
+-- ["RuleVariables"] = {
+-- VariableName = true,
+-- VariableName = true,
+-- },
+-- ["RuleWidgets"] = {
+-- [1] = WidgetA,
+-- [2] = WidgetB,
+-- },
+-- },
 -- }
 
 -- ## Main table of SORTED (Alphabetical > preferred priority) rule widgets to display ##
 -- PastLoot.RuleWidgets = {
-  -- WidgetA,
-  -- WidgetB,
+-- WidgetA,
+-- WidgetB,
 -- }
 
 -- ## Module List in a SORTED order.  Actual headers in self.PluginInfo.ProfileHeader ##
 -- PastLoot.ModuleHeaders = {
-  -- "ModuleA",
-  -- "ModuleB",
+-- "ModuleA",
+-- "ModuleB",
 -- }
 
 -- Widget.Info = {
-  -- [1] = "Text to display in filter list",
-  -- [2] = "Tooltip description",
-  -- [3] = "Module name this belongs to",
+-- [1] = "Text to display in filter list",
+-- [2] = "Tooltip description",
+-- [3] = "Module name this belongs to",
 -- }

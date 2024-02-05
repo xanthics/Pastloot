@@ -159,9 +159,8 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  _, _, _, _, module.CurrentMatch = GetItemInfo(ItemLink)
-  module.CurrentMatch = module.CurrentMatch or 0
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = itemObj.reqLevel
   module:Debug("Required Level: " .. (module.CurrentMatch))
 end
 

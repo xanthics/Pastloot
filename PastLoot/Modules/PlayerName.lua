@@ -120,7 +120,7 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
+function module.Widget:SetMatch(itemObj, Tooltip)
   module.CurrentMatch = UnitName("player")
   module:Debug("Player name: " .. (module.CurrentMatch or ""))
 end

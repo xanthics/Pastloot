@@ -367,12 +367,8 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption("ItemPrice", Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  if (select(4, GetBuildInfo()) < 30200) then
-    module.CurrentMatch = GetSellValue(ItemLink)
-  else
-    _, _, _, _, _, _, _, _, _, _, module.CurrentMatch = GetItemInfo(ItemLink)
-  end
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = itemObj.vendorPrice
   module.CurrentMatch = module.CurrentMatch or 0
   module:Debug("Item Price: " .. module.CurrentMatch)
 end

@@ -160,8 +160,8 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  module.CurrentMatch = GetItemCount(ItemLink, true, false) or 0
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = GetItemCount(itemObj.link, true, false) or 0
   module:Debug("Inventory: " .. module.CurrentMatch)
 end
 

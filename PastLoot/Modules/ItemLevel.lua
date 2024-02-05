@@ -190,9 +190,8 @@ module.Widget.EquipSlotToInvNumber = {
   ["INVTYPE_BAG"] = { 20, 21, 22, 23 },
   ["INVTYPE_QUIVER"] = { 20, 21, 22, 23 },
 }
-function module.Widget:GetCurrentItem(ItemLink)
-  local EquipSlot
-  _, _, _, _, _, _, _, _, EquipSlot, _ = GetItemInfo(ItemLink)
+function module.Widget:GetCurrentItem(itemObj)
+  local EquipSlot = itemObj.equipSlot
   local InvSlot = self.EquipSlotToInvNumber[EquipSlot]
   local ReturnValues = {}
   if (InvSlot) then
@@ -207,13 +206,13 @@ function module.Widget:GetCurrentItem(ItemLink)
   return ReturnValues
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  _, _, _, module.CurrentMatch = GetItemInfo(ItemLink)
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = itemObj.iLevel
   module.CurrentMatch = module.CurrentMatch or 0
 
   local CurrentItem, ItemLevel
-  for Key, Value in pairs(self:GetCurrentItem(ItemLink)) do
-    _, _, _, ItemLevel = GetItemInfo(Value)
+  for Key, Value in pairs(self:GetCurrentItem(itemObj)) do
+    ItemLevel = itemObj.iLevel
     if (ItemLevel) then
       CurrentItem = math.min(ItemLevel, CurrentItem or ItemLevel)
     end

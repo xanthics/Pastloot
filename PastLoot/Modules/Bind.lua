@@ -153,7 +153,7 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
+function module.Widget:SetMatch(itemObj, Tooltip)
   local Line, LineText
   local Bind
   -- Found on line 2 for most items

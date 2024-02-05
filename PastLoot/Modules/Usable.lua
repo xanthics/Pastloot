@@ -136,7 +136,7 @@ function module.Widget:ColorCheck(Red, Green, Blue, Alpha)
   return (Red == 255 and Green == 32 and Blue == 32 and Alpha == 255)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
+function module.Widget:SetMatch(itemObj, Tooltip)
   local Line, Text, Red, Green, Blue, Alpha
   local Usable = 2 -- Choices 2 is usable
   -- Found on line 3 of most items

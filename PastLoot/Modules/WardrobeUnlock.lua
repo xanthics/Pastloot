@@ -121,14 +121,12 @@ function module.Widget:SetException(RuleNum, Index, Value)
 	module:SetConfigOption("Unowned", Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-	local itemID = GetItemInfoFromHyperlink(ItemLink)
+function module.Widget:SetMatch(itemObj, Tooltip)
 	local Owned = 0           -- 0 means no Wardrobe line on tooltip
-	local _, _, _, _, _, _, sSubType = GetItemInfo(ItemLink)
-	if sSubType ~= "Thrown" then -- you can't get wardrobe unlocks from thrown weapons
-		if APPEARANCE_ITEM_INFO[itemID] then
-			local collectedID = APPEARANCE_ITEM_INFO[itemID]:GetCollectedID()
-			if collectedID == itemID then -- unlocked
+	if itemObj.subclass ~= "Thrown" then -- you can't get wardrobe unlocks from thrown weapons
+		if APPEARANCE_ITEM_INFO[itemObj.id] then
+			local collectedID = APPEARANCE_ITEM_INFO[itemObj.id]:GetCollectedID()
+			if collectedID == itemObj.id then -- unlocked
 				Owned = 2
 			elseif collectedID then -- unlocked but from different item
 				Owned = 4
@@ -138,7 +136,7 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
 		end
 	end
 	module.CurrentMatch = Owned
-	module:Debug("Wardrobe: " .. Owned .. " (" .. itemID .. ")")
+	module:Debug("Wardrobe: " .. Owned .. " (" .. itemObj.id .. ")")
 end
 
 function module.Widget:GetMatch(RuleNum, Index)

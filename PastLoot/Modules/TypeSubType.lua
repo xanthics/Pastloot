@@ -753,14 +753,13 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  local _, _, _, _, _, ItemType, ItemSubType, _, _, _ = GetItemInfo(ItemLink)
+function module.Widget:SetMatch(itemObj, Tooltip)
   module.CurrentTypeMatch = -1
   module.CurrentSubTypeMatch = -1
-  for TypeKey, TypeValue in pairs(module.ItemTypes) do
-    if (ItemType == TypeValue.Name) then
-      for SubTypeKey, SubTypeValue in pairs(TypeValue.SubTypes) do
-        if (ItemSubType == SubTypeValue.Name) then
+  for _, TypeValue in pairs(module.ItemTypes) do
+    if (itemObj.class == TypeValue.Name) then
+      for _, SubTypeValue in pairs(TypeValue.SubTypes) do
+        if (itemObj.subclass == SubTypeValue.Name) then
           module.CurrentSubTypeMatch = SubTypeValue.Value
           break
         end
@@ -769,16 +768,16 @@ function module.Widget:SetMatch(ItemLink, Tooltip)
       break
     end
   end
-  if (ItemType) then
-    module:Debug("Type: " .. ItemType .. " Found: (" .. module.CurrentTypeMatch .. ") ")
+  if (itemObj.class) then
+    module:Debug("Type: " .. itemObj.class .. " Found: (" .. module.CurrentTypeMatch .. ") ")
     if (module.CurrentTypeMatch == -1) then
-      module:Debug("Could not find ItemType: " .. ItemType)
+      module:Debug("Could not find ItemType: " .. itemObj.class)
     end
   end
-  if (ItemSubType) then
-    module:Debug("Sub Type: " .. ItemSubType .. " Found: (" .. module.CurrentSubTypeMatch .. ") ")
+  if (itemObj.subclass) then
+    module:Debug("Sub Type: " .. itemObj.subclass .. " Found: (" .. module.CurrentSubTypeMatch .. ") ")
     if (module.CurrentSubTypeMatch == -1) then
-      module:Debug("Could not find ItemSubType: " .. ItemSubType)
+      module:Debug("Could not find ItemSubType: " .. itemObj.subclass)
     end
   end
 end

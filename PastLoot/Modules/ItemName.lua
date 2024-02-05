@@ -148,8 +148,8 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  module.CurrentMatch, _, _, _, _, _, _, _, _, _ = GetItemInfo(ItemLink)
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = itemObj.name
   module:Debug("Item name: " .. (module.CurrentMatch or ""))
 end
 

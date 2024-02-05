@@ -128,10 +128,9 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  local itemID = tonumber(select(3, ItemLink:find("item:(%d-):")))
-  module.CurrentMatch = PastLoot.setIDs[itemID] or false
-  module:Debug("In A Set: " .. tostring(module.CurrentMatch) .. " (" .. ItemLink .. ")")
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = PastLoot.setIDs[itemObj.id] or false
+  module:Debug("In A Set: " .. tostring(module.CurrentMatch) .. " (" .. itemObj.link .. ")")
 end
 
 function module.Widget:GetMatch(RuleNum, Index)

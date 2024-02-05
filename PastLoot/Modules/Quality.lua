@@ -124,9 +124,8 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  local _, _, Quality, _, _, _, _, _, _, _ = GetItemInfo(ItemLink)
-  module.CurrentMatch = Quality
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = itemObj.quality
   module:Debug("Quality Type: " .. (Quality or "nil"))
 end
 

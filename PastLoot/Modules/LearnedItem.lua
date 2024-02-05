@@ -128,7 +128,7 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
+function module.Widget:SetMatch(itemObj, Tooltip)
   local TextLine, Text
   module.CurrentMatch = 3 -- module.Choices[2] = "Unlearned"
   -- Found on line 7 of Reins of the Bronze Drake

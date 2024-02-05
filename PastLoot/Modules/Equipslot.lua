@@ -347,13 +347,12 @@ function module.Widget:SetException(RuleNum, Index, Value)
   module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:SetMatch(ItemLink, Tooltip)
-  local _, _, _, _, _, _, _, _, EquipSlot, _ = GetItemInfo(ItemLink)
-  module.CurrentMatch = module:FindEquipSlot(EquipSlot)
-  if (EquipSlot) then
-    module:Debug("Equip Loc: " .. (EquipSlot or "nil") .. " Found: (" .. module.CurrentMatch .. ") ")
+function module.Widget:SetMatch(itemObj, Tooltip)
+  module.CurrentMatch = module:FindEquipSlot(itemObj.equipSlot)
+  if (itemObj.equipSlot) then
+    module:Debug("Equip Loc: " .. (itemObj.equipSlot or "nil") .. " Found: (" .. module.CurrentMatch .. ") ")
     if (module.CurrentMatch == -1) then
-      module:Debug("Could not find EquipSlot: " .. (EquipSlot or "nil"))
+      module:Debug("Could not find EquipSlot: " .. (itemObj.equipSlot or "nil"))
     end
   end
 end
