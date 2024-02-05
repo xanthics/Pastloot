@@ -1,4 +1,4 @@
-local VERSION = "4.1 r135"
+﻿local VERSION = "4.1 r135"
 PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0", "LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
@@ -307,11 +307,28 @@ local function update_sets()
   end
 end
 
+local function BAG_OPEN(...)
+  PastLoot:OpenInventoryGui()
+end
+
+local function BAG_CLOSE(...)
+  if PastLoot.InventoryGUI then
+    PastLoot.InventoryGUI:Hide()
+  end
+end
+
 local BUCKET_BAG_UPDATE
 function PastLoot:OnEnable()
   BUCKET_BAG_UPDATE = self:RegisterBucketEvent("BAG_UPDATE", 1)
   self:RegisterEvent("MERCHANT_SHOW")
   self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
+
+  self:SecureHook("OpenAllBags", BAG_OPEN)
+	self:SecureHook("OpenBackpack", BAG_OPEN)
+	self:SecureHook("CloseAllBags", BAG_CLOSE)
+	self:SecureHook("CloseBackpack", BAG_CLOSE)
+	-- self:SecureHook("ToggleBag", "BAG_TOGGLE")
+	-- self:SecureHook("ToggleBackpack", "BAG_TOGGLE")
   update_sets()
   self:SetupModulesOptionsTables() -- Creates Module header frames and lays them out in the scroll frame
   self:OnProfileChanged()
@@ -511,7 +528,7 @@ function PastLoot:EvaluateItem(ItemLink)
         if ( not self.TestLink ) then
           if ( RollMethod ) then
             -- RollOnLoot(RollID, RollMethod)
-            return RollMethod
+            return RollMethod, RuleKey
           end
         end
         -- Add to LastRolls
