@@ -11,6 +11,7 @@
 	<Include file="AceConsole-3.0\AceConsole-3.0.xml"/>
 	<Include file="AceGUI-3.0\AceGUI-3.0.xml"/>
 	<Include file="AceConfig-3.0\AceConfig-3.0.xml"/>
+	<Include file="AceHook-3.0\AceHook-3.0.xml"/>
 	<Include file="LibBabble-Inventory-3.0\lib.xml"/>
 	<Include file="LibBabble-TalentTree-3.0\lib.xml"/>
 	<Include file="LibSink-2.0\lib.xml"/>
