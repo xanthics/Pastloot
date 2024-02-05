@@ -4,4 +4,5 @@
 	<Script file="MainGUI.lua"/>
 	<Script file="ModulesGUI.lua"/>
 	<Script file="InventoryGUI.lua"/>
+	<Script file="ItemInfo.lua"/>
 </Ui>
