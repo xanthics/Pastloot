@@ -16,4 +16,12 @@
 	<Include file="LibSink-2.0\lib.xml"/>
 	<Script file="LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
 	<Script file="lib-ScrollingTable\Core.lua"/>
+
+	<GameTooltip name="PastLootTT" inherits="BasicTooltipTemplate">
+		<Scripts>
+			<Onload>
+				self:SetOwner(WorldFrame, "ANCHOR_NONE");
+			</Onload>
+		</Scripts>
+	</GameTooltip>
 </Ui>

@@ -424,10 +424,10 @@ end
 
 function PastLoot:EvaluateItem(ItemLink)
   local Name = GetItemInfo(ItemLink)
-  self.Tooltip:SetOwner(UIParent, "ANCHOR_NONE")
-  self.Tooltip:SetHyperlink(ItemLink)
+  PastLootTT:ClearLines()
+  PastLootTT:SetHyperlink(ItemLink)
   for WidgetKey, WidgetValue in ipairs(self.RuleWidgets) do
-    WidgetValue:SetMatch(ItemLink, self.Tooltip)
+    WidgetValue:SetMatch(ItemLink, PastLootTT)
   end
   local MatchedRule, NumFilters
   local IsMatch, IsException, NormalMatch, ExceptionMatch, HadNoNormal
