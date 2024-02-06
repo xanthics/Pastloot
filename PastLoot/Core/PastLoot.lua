@@ -1,4 +1,4 @@
-﻿local VERSION = "4.1 r135"
+local VERSION = "4.1 r135"
 PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0",
   "LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
@@ -314,9 +314,8 @@ local function BAG_OPEN(...)
 end
 
 local function BAG_CLOSE(...)
-  if PastLoot.InventoryGUI then
-    PastLoot.InventoryGUI:Hide()
-  end
+  if not PastLoot.InventoryGUI then return end
+  PastLoot.InventoryGUI:Hide()
 end
 
 local BUCKET_BAG_UPDATE
@@ -437,6 +436,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 end
 
 function PastLoot:EvaluateItem(itemObj)
+  if not itemObj.link then return end
   local Name = itemObj.name
   PastLootTT:ClearLines()
   PastLootTT:SetHyperlink(itemObj.link)
