@@ -1,4 +1,4 @@
-local VERSION = "4.1 r135"
+﻿local VERSION = "4.1 r135"
 PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0",
   "LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
@@ -393,7 +393,7 @@ end
 function PastLoot:BAG_UPDATE(Event, Bag, ...)
   if Event ~= "BAG_UPDATE" or Bag == nil or Bag < 0 or Bag > 4 then return end
   -- throttle bag updates
-  PastLoot:UpdateInventoryCache()
+  -- PastLoot:UpdateInventoryCache()
   --  print("Bag update")
 end
 
