@@ -113,11 +113,11 @@ function PastLoot:UpdateInventoryCache()
 		for slot = 1, GetContainerNumSlots(bag) do
 			local item = PastLoot:FillContainerItemInfo(nil, bag, slot)
 			if item and item.link then
-				local result, ruleKey = PastLoot:EvaluateItem(item.link)
-				local rule = result == 1 and "Keep" or result == 2 and "Vendor" or result == 3 and "Destroy" or "No Rule"
+				local result, ruleKey = PastLoot:EvaluateItem(item)
+				local rule = result == 1 and "Keep" or result == 2 and "Vendor" or result == 3 and "Destroy" or " No Rule"
 				local keyText = ruleKey and self.db.profile.Rules[ruleKey].Desc or "-"
 				local textureString = format("|T%s:%d:%d|t", item.texture, rowHeight, rowHeight)
-				local entry = { rule, keyText, textureString, item.iLevel, item.name, item.id }
+				local entry = { rule, keyText, textureString, item.iLevel, item.link, item.id }
 				table.insert(PastLoot.InventoryCache, entry)
 			end
 		end
