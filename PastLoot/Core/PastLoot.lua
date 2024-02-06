@@ -393,7 +393,7 @@ end
 function PastLoot:BAG_UPDATE(Event, Bag, ...)
   if Event ~= "BAG_UPDATE" or Bag == nil or Bag < 0 or Bag > 4 then return end
   -- throttle bag updates
-  PastLoot.InventoryCache = nil
+  PastLoot:UpdateInventoryCache()
   --  print("Bag update")
 end
 
