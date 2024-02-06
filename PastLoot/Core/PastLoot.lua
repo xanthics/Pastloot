@@ -310,7 +310,7 @@ local function update_sets()
 end
 
 local function BAG_OPEN(...)
---  PastLoot:OpenInventoryGui()
+  -- PastLoot:OpenInventoryGui()
 end
 
 local function BAG_CLOSE(...)
@@ -324,12 +324,12 @@ function PastLoot:OnEnable()
   self:RegisterEvent("MERCHANT_SHOW")
   self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
 
-  self:SecureHook("OpenAllBags", BAG_OPEN)
-  self:SecureHook("OpenBackpack", BAG_OPEN)
-  self:SecureHook("CloseAllBags", BAG_CLOSE)
-  self:SecureHook("CloseBackpack", BAG_CLOSE)
+  -- self:SecureHook("OpenAllBags", BAG_OPEN)
+  -- self:SecureHook("OpenBackpack", BAG_OPEN)
+  -- self:SecureHook("CloseAllBags", BAG_CLOSE)
+  -- self:SecureHook("CloseBackpack", BAG_CLOSE)
   -- self:SecureHook("ToggleBag", "BAG_TOGGLE")
-  -- self:SecureHook("ToggleBackpack", "BAG_TOGGLE")
+  -- self:SecureHook("ToggleBackpack", BAG_CLOSE)
   update_sets()
   self:SetupModulesOptionsTables() -- Creates Module header frames and lays them out in the scroll frame
   self:OnProfileChanged()
