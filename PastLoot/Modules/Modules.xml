@@ -11,6 +11,7 @@
 	<Script file="LearnedItem.lua"/>
 	<Script file="MysticEnchant.lua"/>
 	<Script file="PlayerName.lua"/>
+	<Script file="PlayerLevel.lua"/>
 	<Script file="Quality.lua"/>
 	<Script file="RequiredLevel.lua"/>
 	<Script file="TypeSubType.lua"/>
