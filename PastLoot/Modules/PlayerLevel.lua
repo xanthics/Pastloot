@@ -161,7 +161,7 @@ end
 
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-  module.CurrentMatch = tostring(UnitLevel("player"))
+  module.CurrentMatch = UnitLevel("player")
   module:Debug("Player Level: " .. (module.CurrentMatch or ""))
 end
 
@@ -268,7 +268,7 @@ end
 function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   local LogicalOperator = Frame.value
-  local Comparison = Value[self.FilterIndex][2]
+  local Comparison = tonumber(Value[self.FilterIndex][2])
   if (Frame:GetName() == self.DropDownEditBox:GetName()) then
     Comparison = Frame:GetText() or ""
   end
