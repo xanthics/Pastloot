@@ -61,18 +61,23 @@ module.Widget = module:CreateWidget()
 function module.Widget:GetData(RuleNum)
 	local Data = module:GetConfigOption(module_key, RuleNum)
 	local Changed = false
-	if (not Data or type(Data) ~= "table") then
-		Data = {}
-		Changed = true
-	end
-	for Key, Value in ipairs(Data) do
-		if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
-			Data[Key] = { module.NewFilterValue, false }
+	if (Data) then
+		if (type(Data) == "table" and #Data > 0) then
+			for Key, Value in ipairs(Data) do
+				if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
+					Data[Key] = { module.NewFilterValue, false }
+					Changed = true
+				end
+			end
+		else
+			Data = nil
 			Changed = true
 		end
 	end
-	if (Changed) then module:SetConfigOption(module_key, Data) end
-	return Data
+	if (Changed) then
+		module:SetConfigOption(module_key, Data)
+	end
+	return Data or {}
 end
 
 function module.Widget:GetNumFilters(RuleNum)
