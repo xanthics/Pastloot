@@ -221,4 +221,7 @@ L["Zone Name_Desc"] = [=[Zone name to match selected rule to, leave empty to mat
 Shift-right-click to fill with current zone name]=]
 L["Zone Type"] = true
 L["%zonetype% - %instancedifficulty%"] = true
-
+L["NameRule"] = true
+L["(Add) or (remove) an item by name to an existing rule."] = true
+L["IDRule"] = true
+L["(Add) or (remove) an item by id to an existing rule"] = true

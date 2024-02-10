@@ -30,6 +30,55 @@ local defaults = {
 	},
 }
 
+local function handleMouseover(cmdname)
+	local name, link = GameTooltip:GetItem()
+	if GameTooltip:IsShown() and link then
+		if cmdname == "IDRule" then
+			local item = PastLoot:InitItem(link)
+			return tostring(item.id)
+		else
+			return name
+		end
+	end
+	PastLoot:Pour("No valid item tooltip found.")
+end
+
+local function handleAddRemove(value, cmdname, dbkey, example)
+	local idx, flag, command = value:match("(%d-) (%S*) (.*)")
+	if command and idx and flag then
+		flag = flag:lower()
+		idx = tonumber(idx)
+	end
+	if not command or not idx or (flag ~= "add" and flag ~= "remove") or not PastLoot.db.profile.Rules[idx] then
+		PastLoot:Pour("This command requires a valid Rule Number, the operation 'add' or 'remove', and either the value to add or 'mouseover' to use the current tooltip.")
+		PastLoot:Pour("Example: /pastloot "..cmdname.." 1 add "..example)
+		PastLoot:Pour("Example: /pastloot "..cmdname.." 1 remove mouseover")
+		return
+	end
+	if command == "mouseover" then
+		command = handleMouseover(cmdname)
+	end
+	if command then
+		if flag == "add" then
+			PastLoot.db.profile.Rules[idx][dbkey] = PastLoot.db.profile.Rules[idx][dbkey] or {}
+			if cmdname == "IDRule" then
+				table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, false})
+			else
+				table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, "Exact", false})
+			end
+		elseif PastLoot.db.profile.Rules[idx][dbkey] then
+			for i,v in pairs(PastLoot.db.profile.Rules[idx][dbkey]) do
+				if v[1]:lower() == command then
+					table.remove(PastLoot.db.profile.Rules[idx][dbkey], i)
+					break
+				end
+			end
+		else
+		end
+		PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
+	end
+end
+
 PastLoot.OptionsTable = {
 	["type"] = "group",
 	["handler"] = PastLoot,
@@ -38,6 +87,7 @@ PastLoot.OptionsTable = {
 	["args"] = {
 		["Menu"] = {
 			["name"] = L["Menu"],
+			["order"] = 0,
 			["desc"] = L["Opens the PastLoot Menu."],
 			["type"] = "execute",
 			["func"] = function()
@@ -46,6 +96,7 @@ PastLoot.OptionsTable = {
 		},
 		["Test"] = {
 			["name"] = L["Test"],
+			["order"] = 30,
 			["desc"] = L["Test an item link to see how we would roll"],
 			["type"] = "input",
 			["get"] = function() end,
@@ -62,6 +113,7 @@ PastLoot.OptionsTable = {
 		},
 		["TestAll"] = {
 			["name"] = L["TestAll"],
+			["order"] = 40,
 			["desc"] = L["Test all items currently in your inventory"],
 			["type"] = "input",
 			["get"] = function() end,
@@ -79,8 +131,29 @@ PastLoot.OptionsTable = {
 				end
 			end,
 		},
+		["NameRule"] = {
+			["name"] = L["NameRule"],
+			["order"] = 60,
+			["desc"] = L["(Add) or (remove) an item by name to an existing rule."],
+			["type"] = "input",
+			["get"] = function() end,
+			["set"] = function(info, value)
+				handleAddRemove(value, "NameRule", "Items", "Turtle Meat")
+			end,
+		},
+		["IDRule"] = {
+			["name"] = L["IDRule"],
+			["order"] = 50,
+			["desc"] = L["(Add) or (remove) an item by id to an existing rule"],
+			["type"] = "input",
+			["get"] = function() end,
+			["set"] = function(info, value)
+				handleAddRemove(value, "IDRule", "ItemIDs", "3712")
+			end,
+		},
 		["Options"] = {
 			["name"] = L["Options"],
+			["order"] = 20,
 			["desc"] = L["General Options"],
 			["type"] = "group",
 			["args"] = {
@@ -193,6 +266,7 @@ PastLoot.OptionsTable = {
 		},
 		["Modules"] = {
 			["name"] = L["Modules"],
+			["order"] = 10,
 			["type"] = "group",
 			["args"] = {},
 		},
