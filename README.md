@@ -14,13 +14,10 @@ Full usable but not yet ready for release
 review -> accept button
 macro to add/remove to default keep/vendor/delete rules
 implement destroy => on acquire, at bagspace threshold => report to default output
-Module -> Item ID
-module -> item in equipment set
 default rules
 
 [Low Priority]
 warn when unvendorable item matches sell rule
-implement "test mode"
 Module -> tsm prices
 Module -> tsm vs vendor
 ```
