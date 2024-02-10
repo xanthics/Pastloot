@@ -212,7 +212,7 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 
   local CurrentItem, ItemLevel
   for Key, Value in pairs(self:GetCurrentItem(itemObj)) do
-    ItemLevel = itemObj.iLevel
+    _, _, _, ItemLevel = GetItemInfo(Value)
     if (ItemLevel) then
       CurrentItem = math.min(ItemLevel, CurrentItem or ItemLevel)
     end
