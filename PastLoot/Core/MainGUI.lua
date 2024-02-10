@@ -485,15 +485,9 @@ function PastLoot:Create_RuleListFrame()
   Frame.ScrollFrame:SetPoint("TOPLEFT", Frame, "TOPLEFT", 0, -8)
   Frame.ScrollFrame:SetWidth(381)
   Frame.ScrollFrame:SetHeight(96)
-  if ( select(4, GetBuildInfo()) >= 30000 ) then
-    Frame.ScrollFrame:SetScript("OnVerticalScroll", function(frame, offset)
-      FauxScrollFrame_OnVerticalScroll(frame, offset, 16, function() self:Rules_RuleList_OnScroll() end)
-    end)
-  else
-    Frame.ScrollFrame:SetScript("OnVerticalScroll", function()
-      FauxScrollFrame_OnVerticalScroll(16, function() self:Rules_RuleList_OnScroll() end)
-    end)
-  end
+  Frame.ScrollFrame:SetScript("OnVerticalScroll", function(frame, offset)
+    FauxScrollFrame_OnVerticalScroll(frame, offset, 16, function() self:Rules_RuleList_OnScroll() end)
+  end)
   
   Frame.ScrollLine1 = self:Create_RuleListScrollLine()
   Frame.ScrollLine1:SetParent(Frame)
@@ -839,15 +833,9 @@ function PastLoot:Create_RuleAvailableFiltersFrame()
   Frame.ScrollFrame:SetPoint("TOPLEFT", Frame, "TOPLEFT", 0, -5)
   Frame.ScrollFrame:SetWidth(162)
   Frame.ScrollFrame:SetHeight(128)
-  if ( select(4, GetBuildInfo()) >= 30000 ) then
-    Frame.ScrollFrame:SetScript("OnVerticalScroll", function(frame, offset)
-      FauxScrollFrame_OnVerticalScroll(frame, offset, 16, function() self:Rules_AvailableFilters_OnScroll() end)
-    end)
-  else
-    Frame.ScrollFrame:SetScript("OnVerticalScroll", function()
-      FauxScrollFrame_OnVerticalScroll(16, function() self:Rules_AvailableFilters_OnScroll() end)
-    end)
-  end
+  Frame.ScrollFrame:SetScript("OnVerticalScroll", function(frame, offset)
+    FauxScrollFrame_OnVerticalScroll(frame, offset, 16, function() self:Rules_AvailableFilters_OnScroll() end)
+  end)
   
   Frame.ScrollLine1 = self:Create_AvailableFiltersScrollLine()
   Frame.ScrollLine1:SetParent(Frame)
@@ -911,15 +899,9 @@ function PastLoot:Create_RuleActiveFiltersFrame()
   Frame.ScrollFrame:SetPoint("TOPLEFT", Frame, "TOPLEFT", 0, -5)
   Frame.ScrollFrame:SetWidth(185)
   Frame.ScrollFrame:SetHeight(128)
-  if ( select(4, GetBuildInfo()) >= 30000 ) then
-    Frame.ScrollFrame:SetScript("OnVerticalScroll", function(frame, offset)
-      FauxScrollFrame_OnVerticalScroll(frame, offset, 16, function() self:Rules_ActiveFilters_OnScroll() end)
-    end)
-  else
-    Frame.ScrollFrame:SetScript("OnVerticalScroll", function()
-      FauxScrollFrame_OnVerticalScroll(16, function() self:Rules_ActiveFilters_OnScroll() end)
-    end)
-  end
+  Frame.ScrollFrame:SetScript("OnVerticalScroll", function(frame, offset)
+    FauxScrollFrame_OnVerticalScroll(frame, offset, 16, function() self:Rules_ActiveFilters_OnScroll() end)
+  end)
 
   Frame.ScrollLine1 = self:Create_ActiveFiltersScrollLine()
   Frame.ScrollLine1:SetParent(Frame)

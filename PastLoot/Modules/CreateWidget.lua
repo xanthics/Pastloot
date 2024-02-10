@@ -14,11 +14,7 @@ function PastLoot:CreateSimpleDropdown(module, module_name, frame_name, module_t
     Widget:EnableMouse(true)
     Widget:SetHitRectInsets(15, 15, 0, 0)
     _G[Widget:GetName() .. "Text"]:SetJustifyH("CENTER")
-    if (select(4, GetBuildInfo()) < 30000) then
-        UIDropDownMenu_SetWidth(120, Widget)
-    else
-        UIDropDownMenu_SetWidth(Widget, 120)
-    end
+    UIDropDownMenu_SetWidth(Widget, 120)
     Widget:SetScript("OnEnter", function() self:ShowTooltip(module_name, module_tooltip) end)
     Widget:SetScript("OnLeave", function() GameTooltip:Hide() end)
     local Button = _G[Widget:GetName() .. "Button"]
@@ -30,11 +26,7 @@ function PastLoot:CreateSimpleDropdown(module, module_name, frame_name, module_t
     Title:SetText(module_name)
     Widget:SetParent(nil)
     Widget:Hide()
-    if (select(4, GetBuildInfo()) < 30000) then
-        Widget.initialize = function(...) module:DropDown_Init(Widget, ...) end
-    else
-        Widget.initialize = function(...) module:DropDown_Init(...) end
-    end
+    Widget.initialize = function(...) module:DropDown_Init(...) end
     Widget.YPaddingTop = Title:GetHeight()
     Widget.Height = Widget:GetHeight() + Widget.YPaddingTop
     Widget.XPaddingLeft = -15

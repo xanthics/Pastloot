@@ -130,11 +130,7 @@ function module.Widget:DisplayWidget(Index)
     module.FilterIndex = Index
   end
   local Value = self:GetData()
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetText(module:GetBindSlotText(Value[module.FilterIndex][1]), module.Widget)
-  else
-    UIDropDownMenu_SetText(module.Widget, module:GetBindSlotText(Value[module.FilterIndex][1]))
-  end
+  UIDropDownMenu_SetText(module.Widget, module:GetBindSlotText(Value[module.FilterIndex][1]))
 end
 
 function module.Widget:GetFilterText(Index)
@@ -196,11 +192,7 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if (select(4, GetBuildInfo()) < 30000) then
-    info.func = function(...) self:DropDown_OnClick(this, ...) end
-  else
-    info.func = function(...) self:DropDown_OnClick(...) end
-  end
+  info.func = function(...) self:DropDown_OnClick(...) end
   info.owner = Frame
   for Key, Value in ipairs(self.Choices) do
     info.text = Value.Name
@@ -213,11 +205,7 @@ function module:DropDown_OnClick(Frame)
   local Value = self.Widget:GetData()
   Value[self.FilterIndex][1] = Frame.value
   self:SetConfigOption(module_key, Value)
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetText(Frame:GetText(), Frame.owner)
-  else
-    UIDropDownMenu_SetText(Frame.owner, Frame:GetText())
-  end
+  UIDropDownMenu_SetText(Frame.owner, Frame:GetText())
 end
 
 function module:GetBindSlotText(BindID)

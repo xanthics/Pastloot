@@ -42,43 +42,13 @@ module.NewFilterValue_LogicalOperator = 1
 module.NewFilterValue_Comparison = 0
 
 function module:OnEnable()
-  if (select(4, GetBuildInfo()) < 30200) then
-    self:CheckItemPriceLibrary()
-    if (not GetSellValue) then
-      PastLoot:Print("GetSellValue() or ItemPrice-1.1 library not available")
-      return
-    end
-  end
   self:RegisterDefaultVariables(self.ConfigOptions_RuleDefaults)
   self:AddWidget(self.Widget)
 end
 
 function module:OnDisable()
-  if (select(4, GetBuildInfo()) < 30200) then
-    if (not GetSellValue) then
-      return
-    end
-  end
   self:UnregisterDefaultVariables()
   self:RemoveWidgets()
-end
-
-if (select(4, GetBuildInfo()) < 30200) then
-  module.OriginalGetSellValue = GetSellValue
-  function module:CheckItemPriceLibrary()
-    if (LibStub("ItemPrice-1.1", true)) then
-      -- Use our function, or if it doesn't know it, try the original one (someone elses)
-      GetSellValue = function(item)
-        local id = type(item) == "number" and item or type(item) == "string" and tonumber(item:match("item:(%d+)"))
-        if (not id and type(item) == "string") then   -- Convert item name to itemid, only works if the player has the item in his bags
-          local _, link = GetItemInfo(item)
-          id = link and tonumber(link:match("item:(%d+)"))
-        end
-        return id and
-        (LibStub("ItemPrice-1.1"):GetPrice(id) or module.OriginalGetSellValue and module.OriginalGetSellValue(id))
-      end
-    end
-  end
 end
 
 local function SetMoney_MoneyInputFrame(Frame, Money)
@@ -227,11 +197,7 @@ function module:CreateDropDown()
   DropDown:EnableMouse(true)
   DropDown:SetHitRectInsets(15, 15, 0, 0)
   _G[DropDown:GetName() .. "Text"]:SetJustifyH("CENTER")
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetWidth(120, DropDown)
-  else
-    UIDropDownMenu_SetWidth(DropDown, 120)
-  end
+  UIDropDownMenu_SetWidth(DropDown, 120)
   DropDown:SetScript("OnEnter",
     function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
   DropDown:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -243,11 +209,7 @@ function module:CreateDropDown()
   DropDown.Title:SetParent(DropDown)
   DropDown.Title:SetPoint("BOTTOMLEFT", DropDown, "TOPLEFT", 20, 0)
   DropDown.Title:SetText(L["Item Price"])
-  if (select(4, GetBuildInfo()) < 30000) then
-    DropDown.initialize = function(...) self:DropDown_Init(DropDown, ...) end
-  else
-    DropDown.initialize = function(...) self:DropDown_Init(...) end
-  end
+  DropDown.initialize = function(...) self:DropDown_Init(...) end
   return DropDown
 end
 
@@ -340,11 +302,7 @@ function module.Widget:DisplayWidget(Index)
   local Value = self:GetData()
   local Value_LogicalOperator = Value[module.FilterIndex][1]
   local Value_Comparison = Value[module.FilterIndex][2]
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetText(module:GetDropDownText(Value_LogicalOperator), module.Widget.DropDown)
-  else
-    UIDropDownMenu_SetText(module.Widget.DropDown, module:GetDropDownText(Value_LogicalOperator))
-  end
+  UIDropDownMenu_SetText(module.Widget.DropDown, module:GetDropDownText(Value_LogicalOperator))
   module.Widget.MoneyInputFrame:SetMoney(Value_Comparison)
 end
 
@@ -408,11 +366,7 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if (select(4, GetBuildInfo()) < 30000) then
-    info.func = function(...) self:DropDown_OnClick(this, ...) end
-  else
-    info.func = function(...) self:DropDown_OnClick(...) end
-  end
+  info.func = function(...) self:DropDown_OnClick(...) end
   info.owner = Frame
   for Key, Value in ipairs(self.Choices) do
     info.text = Value.Name
@@ -426,11 +380,7 @@ function module:DropDown_OnClick(Frame)
   local LogicalOperator = Frame.value
   Value[self.FilterIndex][1] = LogicalOperator
   self:SetConfigOption("ItemPrice", Value)
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetText(self:GetDropDownText(LogicalOperator), Frame.owner)
-  else
-    UIDropDownMenu_SetText(Frame.owner, self:GetDropDownText(LogicalOperator))
-  end
+  UIDropDownMenu_SetText(Frame.owner, self:GetDropDownText(LogicalOperator))
 end
 
 function module:SetMoney()

@@ -728,11 +728,7 @@ function module.Widget:DisplayWidget(Index)
   local Value = self:GetData()
   local Value_Type = Value[module.FilterIndex][1]
   local Value_SubType = Value[module.FilterIndex][2]
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetText(module:GetTypeSlotText(Value_Type, Value_SubType), module.Widget)
-  else
-    UIDropDownMenu_SetText(module.Widget, module:GetTypeSlotText(Value_Type, Value_SubType))
-  end
+  UIDropDownMenu_SetText(module.Widget, module:GetTypeSlotText(Value_Type, Value_SubType))
 end
 
 function module.Widget:GetFilterText(Index)
@@ -806,11 +802,7 @@ function module:DropDown_Init(Frame, Level)
   local info = {}
   info.checked = false
   info.notCheckable = true
-  if (select(4, GetBuildInfo()) < 30000) then
-    info.func = function(...) self:DropDown_OnClick(this, ...) end
-  else
-    info.func = function(...) self:DropDown_OnClick(...) end
-  end
+  info.func = function(...) self:DropDown_OnClick(...) end
   info.owner = Frame
   if (Level == 1) then
     for Key, Value in ipairs(self.ItemTypes) do
@@ -844,11 +836,7 @@ function module:DropDown_OnClick(Frame)
   Value[self.FilterIndex][1] = Frame.value.Type
   Value[self.FilterIndex][2] = Frame.value.SubType
   self:SetConfigOption(module_key, Value)
-  if (select(4, GetBuildInfo()) < 30000) then
-    UIDropDownMenu_SetText(self:GetTypeSlotText(Frame.value.Type, Frame.value.SubType), Frame.owner)
-  else
-    UIDropDownMenu_SetText(Frame.owner, self:GetTypeSlotText(Frame.value.Type, Frame.value.SubType))
-  end
+  UIDropDownMenu_SetText(Frame.owner, self:GetTypeSlotText(Frame.value.Type, Frame.value.SubType))
   DropDownList1:Hide() -- Nested dropdown buttons don't hide their parent menus on click.
 end
 
