@@ -9,53 +9,53 @@ PastLoot.PluginInfo = {}
 
 -- Unused.  We can let the module unregister variables, and remove widgets from the filter list.
 -- function PastLoot.Prototypes:OnDisable()
-  -- ChatFrame1:AddMessage("OnDisable() Called for "..self:GetName())
-  -- self:UnregisterDefaultVariables()
-  -- self:RemoveWidgets()
+	-- ChatFrame1:AddMessage("OnDisable() Called for "..self:GetName())
+	-- self:UnregisterDefaultVariables()
+	-- self:RemoveWidgets()
 -- end
 
 -- Registers the default variables
 -- RuleVariables = {
-  -- { VariableName, Default},
-  -- { VariableName, Default},
+	-- { VariableName, Default},
+	-- { VariableName, Default},
 -- }
 function PastLoot.Prototypes:RegisterDefaultVariables(RuleVariables)
-  local Module = self:GetName()
-  PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
-  if ( type(RuleVariables) ~= "table" ) then
-    return
-  end
-  for NewKey, NewValue in pairs(RuleVariables) do
-    if ( type(NewValue) ~= "table" ) then
-      return
-    end
-    for VariableKey, VariableValue in pairs(PastLoot.DefaultTemplate) do
-      if ( NewValue[1] == VariableValue[1] ) then
-        return
-      end
-    end
-  end
-  PastLoot.PluginInfo[Module].RuleVariables = PastLoot.PluginInfo[Module].RuleVariables or {}
-  for Key, Value in pairs(RuleVariables) do
-    -- table.insert(PastLoot.PluginInfo[self:GetName()].RuleVariables, { Value[1], PastLoot:CopyTable(Value[2]) })
-    PastLoot.PluginInfo[self:GetName()].RuleVariables[Value[1]] = true
-    -- table.sort(PastLoot.PluginInfo[self:GetName()].RuleVariables, function(A, B) if ( A[1] < B[1] ) then return true end end)
-    table.insert(PastLoot.DefaultTemplate, { Value[1], PastLoot:CopyTable(Value[2]) })
-  end
+	local Module = self:GetName()
+	PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
+	if ( type(RuleVariables) ~= "table" ) then
+		return
+	end
+	for NewKey, NewValue in pairs(RuleVariables) do
+		if ( type(NewValue) ~= "table" ) then
+			return
+		end
+		for VariableKey, VariableValue in pairs(PastLoot.DefaultTemplate) do
+			if ( NewValue[1] == VariableValue[1] ) then
+				return
+			end
+		end
+	end
+	PastLoot.PluginInfo[Module].RuleVariables = PastLoot.PluginInfo[Module].RuleVariables or {}
+	for Key, Value in pairs(RuleVariables) do
+		-- table.insert(PastLoot.PluginInfo[self:GetName()].RuleVariables, { Value[1], PastLoot:CopyTable(Value[2]) })
+		PastLoot.PluginInfo[self:GetName()].RuleVariables[Value[1]] = true
+		-- table.sort(PastLoot.PluginInfo[self:GetName()].RuleVariables, function(A, B) if ( A[1] < B[1] ) then return true end end)
+		table.insert(PastLoot.DefaultTemplate, { Value[1], PastLoot:CopyTable(Value[2]) })
+	end
 end
 
 function PastLoot.Prototypes:UnregisterDefaultVariables()
-  local Module = self:GetName()
-  PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
-  PastLoot.PluginInfo[Module].RuleVariables = PastLoot.PluginInfo[Module].RuleVariables or {}
-  for VarKey, VarValue in pairs(PastLoot.PluginInfo[Module].RuleVariables) do
-    for Index = #PastLoot.DefaultTemplate, 1, -1 do
-      if ( PastLoot.DefaultTemplate[Index][1] == VarKey ) then
-        table.remove(PastLoot.DefaultTemplate, Index)
-        break
-      end
-    end
-  end
+	local Module = self:GetName()
+	PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
+	PastLoot.PluginInfo[Module].RuleVariables = PastLoot.PluginInfo[Module].RuleVariables or {}
+	for VarKey, VarValue in pairs(PastLoot.PluginInfo[Module].RuleVariables) do
+		for Index = #PastLoot.DefaultTemplate, 1, -1 do
+			if ( PastLoot.DefaultTemplate[Index][1] == VarKey ) then
+				table.remove(PastLoot.DefaultTemplate, Index)
+				break
+			end
+		end
+	end
 end
 
 -- Each Widget is a filter for PastLoot.
@@ -70,144 +70,144 @@ end
 -- IsException(RuleNum, Index)  -- If the filter is an exception.
 -- SetException(RuleNum, Index, true/false) -- Set the exception.
 function PastLoot.Prototypes:AddWidget(Widget)
-  if ( type(Widget) ~= "table"
-  or not Widget.GetNumFilters
-  or not Widget.AddNewFilter
-  or not Widget.RemoveFilter
-  or not Widget.DisplayWidget
-  or not Widget.GetFilterText
-  or not Widget.SetMatch
-  or not Widget.GetMatch
-  or type(Widget.Info) ~= "table" ) then
-    -- 1 = Module Text to display in filter list
-    -- 2 = Tooltip info
-    -- 3 = Module this belongs to.  (Set here)
-    return
-  end
-  if ( not Widget.IsException or not Widget.SetException ) then
-    Widget.IsException = PastLoot.TempIsException
-    Widget.SetException = PastLoot.TempSetException
-  end
-  PastLoot.RuleWidgets = PastLoot.RuleWidgets or {}
-  for Key, Value in pairs(PastLoot.RuleWidgets) do
-    if ( Value == Widget ) then
-      return
-    end
-  end
-  local Module = self:GetName()
-  Widget.Info[3] = Module
-  Widget.PreferredPriority = Widget.PreferredPriority or 1000
-  -- Widget.ModuleOwner = self:GetName()
-  table.insert(PastLoot.RuleWidgets, Widget)
-  -- PastLoot:Settings_ScrollFrame_Update()
-  -- table.sort(PastLoot.RuleWidgets, function(a, b) if ( a.PreferredPriority < b.PreferredPriority ) then return true end end)
-  table.sort(PastLoot.RuleWidgets, function(a, b) if ( (a.Info[3] < b.Info[3]) or ((a.Info[3] == b.Info[3]) and (a.PreferredPriority < b.PreferredPriority)) ) then return true end end)
-  Widget:ClearAllPoints()
-  Widget:SetPoint("TOP", PastLoot.RulesFrame.Settings, "BOTTOM", ((Widget.XPaddingLeft or 0) - (Widget.XPaddingRight or 0)) / 2, 83 - (Widget.YPaddingTop or 0))
-  Widget:SetParent(PastLoot.RulesFrame.Settings)
-  Widget:Hide()
-  PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
-  PastLoot.PluginInfo[Module].RuleWidgets = PastLoot.PluginInfo[Module].RuleWidgets or {}
-  for Key, Value in pairs(PastLoot.PluginInfo[Module].RuleWidgets) do
-    if ( Value == Widget ) then
-      return
-    end
-  end
-  table.insert(PastLoot.PluginInfo[Module].RuleWidgets, Widget)
+	if ( type(Widget) ~= "table"
+	or not Widget.GetNumFilters
+	or not Widget.AddNewFilter
+	or not Widget.RemoveFilter
+	or not Widget.DisplayWidget
+	or not Widget.GetFilterText
+	or not Widget.SetMatch
+	or not Widget.GetMatch
+	or type(Widget.Info) ~= "table" ) then
+		-- 1 = Module Text to display in filter list
+		-- 2 = Tooltip info
+		-- 3 = Module this belongs to.  (Set here)
+		return
+	end
+	if ( not Widget.IsException or not Widget.SetException ) then
+		Widget.IsException = PastLoot.TempIsException
+		Widget.SetException = PastLoot.TempSetException
+	end
+	PastLoot.RuleWidgets = PastLoot.RuleWidgets or {}
+	for Key, Value in pairs(PastLoot.RuleWidgets) do
+		if ( Value == Widget ) then
+			return
+		end
+	end
+	local Module = self:GetName()
+	Widget.Info[3] = Module
+	Widget.PreferredPriority = Widget.PreferredPriority or 1000
+	-- Widget.ModuleOwner = self:GetName()
+	table.insert(PastLoot.RuleWidgets, Widget)
+	-- PastLoot:Settings_ScrollFrame_Update()
+	-- table.sort(PastLoot.RuleWidgets, function(a, b) if ( a.PreferredPriority < b.PreferredPriority ) then return true end end)
+	table.sort(PastLoot.RuleWidgets, function(a, b) if ( (a.Info[3] < b.Info[3]) or ((a.Info[3] == b.Info[3]) and (a.PreferredPriority < b.PreferredPriority)) ) then return true end end)
+	Widget:ClearAllPoints()
+	Widget:SetPoint("TOP", PastLoot.RulesFrame.Settings, "BOTTOM", ((Widget.XPaddingLeft or 0) - (Widget.XPaddingRight or 0)) / 2, 83 - (Widget.YPaddingTop or 0))
+	Widget:SetParent(PastLoot.RulesFrame.Settings)
+	Widget:Hide()
+	PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
+	PastLoot.PluginInfo[Module].RuleWidgets = PastLoot.PluginInfo[Module].RuleWidgets or {}
+	for Key, Value in pairs(PastLoot.PluginInfo[Module].RuleWidgets) do
+		if ( Value == Widget ) then
+			return
+		end
+	end
+	table.insert(PastLoot.PluginInfo[Module].RuleWidgets, Widget)
 end
 
 function PastLoot.Prototypes:RemoveWidgets()
-  local Module = self:GetName()
-  PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
-  PastLoot.PluginInfo[Module].RuleWidgets = PastLoot.PluginInfo[Module].RuleWidgets or {}
-  for PluginKey, PluginValue in pairs(PastLoot.PluginInfo[Module].RuleWidgets) do
-    for RuleKey, RuleValue in pairs(PastLoot.RuleWidgets) do
-      if ( RuleValue == PluginValue ) then
-        PluginValue:Hide()
-        PluginValue:SetParent(nil)
-        table.remove(PastLoot.RuleWidgets, RuleKey)
-        break
-      end
-    end
-  end
+	local Module = self:GetName()
+	PastLoot.PluginInfo[Module] = PastLoot.PluginInfo[Module] or {}
+	PastLoot.PluginInfo[Module].RuleWidgets = PastLoot.PluginInfo[Module].RuleWidgets or {}
+	for PluginKey, PluginValue in pairs(PastLoot.PluginInfo[Module].RuleWidgets) do
+		for RuleKey, RuleValue in pairs(PastLoot.RuleWidgets) do
+			if ( RuleValue == PluginValue ) then
+				PluginValue:Hide()
+				PluginValue:SetParent(nil)
+				table.remove(PastLoot.RuleWidgets, RuleKey)
+				break
+			end
+		end
+	end
 end
 
 function PastLoot.Prototypes:AddModuleOptionTable(TableName, Table)
-  local Module = self:GetName()
-  if ( not PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] ) then
-    PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] = Table
-  end
+	local Module = self:GetName()
+	if ( not PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] ) then
+		PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] = Table
+	end
 end
 
 function PastLoot.Prototypes:RemoveModuleOptionTable(TableName)
-  local Module = self:GetName()
-  if ( PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] ) then
-    PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] = nil
-  end
+	local Module = self:GetName()
+	if ( PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] ) then
+		PastLoot.OptionsTable.args.Modules.args[Module].args[TableName] = nil
+	end
 end
 
 -- Sets a variable in the rule.  This function verifies that the variable being set is registered to the module.
 function PastLoot.Prototypes:SetConfigOption(Variable, Value, RuleNum)
-  local Module = self:GetName()
-  RuleNum = RuleNum or PastLoot.CurrentRule
-  if ( RuleNum > 0
-  and Module
-  and PastLoot.PluginInfo[Module]
-  and PastLoot.PluginInfo[Module].RuleVariables ) then
-    if ( PastLoot.PluginInfo[Module].RuleVariables[Variable] ) then
-      PastLoot.db.profile.Rules[RuleNum][Variable] = Value
-      PastLoot:Rules_ActiveFilters_OnScroll()
-      return
-    end
-  end
+	local Module = self:GetName()
+	RuleNum = RuleNum or PastLoot.CurrentRule
+	if ( RuleNum > 0
+	and Module
+	and PastLoot.PluginInfo[Module]
+	and PastLoot.PluginInfo[Module].RuleVariables ) then
+		if ( PastLoot.PluginInfo[Module].RuleVariables[Variable] ) then
+			PastLoot.db.profile.Rules[RuleNum][Variable] = Value
+			PastLoot:Rules_ActiveFilters_OnScroll()
+			return
+		end
+	end
 end
 
 -- Gets a variable from a rule.  This function does not verify that the variable belongs to the module.
 function PastLoot.Prototypes:GetConfigOption(Variable, RuleNum)
-  RuleNum = RuleNum or PastLoot.CurrentRule
-  if ( RuleNum > 0 ) then
-    return PastLoot.db.profile.Rules[RuleNum][Variable]
-  end
+	RuleNum = RuleNum or PastLoot.CurrentRule
+	if ( RuleNum > 0 ) then
+		return PastLoot.db.profile.Rules[RuleNum][Variable]
+	end
 end
 
 function PastLoot.Prototypes:SetGlobalVariable(Variable, Value)
-  local Module = self:GetName()
-  if ( Module
-  and PastLoot.db.global.Modules
-  and PastLoot.db.global.Modules[Module] ) then
-    PastLoot.db.global.Modules[Module].Vars = PastLoot.db.global.Modules[Module].Vars or {}
-    PastLoot.db.global.Modules[Module].Vars[Variable] = Value
-  end
+	local Module = self:GetName()
+	if ( Module
+	and PastLoot.db.global.Modules
+	and PastLoot.db.global.Modules[Module] ) then
+		PastLoot.db.global.Modules[Module].Vars = PastLoot.db.global.Modules[Module].Vars or {}
+		PastLoot.db.global.Modules[Module].Vars[Variable] = Value
+	end
 end
 
 function PastLoot.Prototypes:GetGlobalVariable(Variable)
-  local Module = self:GetName()
-  if ( Module
-  and PastLoot.db.global.Modules
-  and PastLoot.db.global.Modules[Module]
-  and PastLoot.db.global.Modules[Module].Vars ) then
-    return PastLoot.db.global.Modules[Module].Vars[Variable]
-  end
+	local Module = self:GetName()
+	if ( Module
+	and PastLoot.db.global.Modules
+	and PastLoot.db.global.Modules[Module]
+	and PastLoot.db.global.Modules[Module].Vars ) then
+		return PastLoot.db.global.Modules[Module].Vars[Variable]
+	end
 end
 
 function PastLoot.Prototypes:SetProfileVariable(Variable, Value)
-  local Module = self:GetName()
-  if ( Module
-  and PastLoot.db.profile.Modules
-  and PastLoot.db.profile.Modules[Module] ) then
-    PastLoot.db.profile.Modules[Module].ProfileVars = PastLoot.db.profile.Modules[Module].ProfileVars or {}
-    PastLoot.db.profile.Modules[Module].ProfileVars[Variable] = Value
-  end
+	local Module = self:GetName()
+	if ( Module
+	and PastLoot.db.profile.Modules
+	and PastLoot.db.profile.Modules[Module] ) then
+		PastLoot.db.profile.Modules[Module].ProfileVars = PastLoot.db.profile.Modules[Module].ProfileVars or {}
+		PastLoot.db.profile.Modules[Module].ProfileVars[Variable] = Value
+	end
 end
 
 function PastLoot.Prototypes:GetProfileVariable(Variable)
-  local Module = self:GetName()
-  if ( Module
-  and PastLoot.db.profile.Modules
-  and PastLoot.db.profile.Modules[Module]
-  and PastLoot.db.profile.Modules[Module].ProfileVars ) then
-    return PastLoot.db.profile.Modules[Module].ProfileVars[Variable]
-  end
+	local Module = self:GetName()
+	if ( Module
+	and PastLoot.db.profile.Modules
+	and PastLoot.db.profile.Modules[Module]
+	and PastLoot.db.profile.Modules[Module].ProfileVars ) then
+		return PastLoot.db.profile.Modules[Module].ProfileVars[Variable]
+	end
 end
 
 PastLoot.Prototypes.ShowTooltip = PastLoot.ShowTooltip
@@ -217,72 +217,72 @@ PastLoot.Prototypes.ShowTooltip = PastLoot.ShowTooltip
 PastLoot.Prototypes.ScrollLeft = PastLoot.ScrollLeft
 
 function PastLoot.Prototypes:Debug(...)
-  local DebugLine, Counter
-  if ( PastLoot.DebugVar == true ) then
-    if ( self.GetName ) then
-      DebugLine = "("..(self:GetName() or "")..") "
-    else
-      DebugLine = ""
-    end
-    for Counter = 1, select("#", ...) do
-      DebugLine = DebugLine..select(Counter, ...)
-    end
-    -- PastLoot:Print(_G[PastLoot.db.profile.OutputFrame], DebugLine)
-    PastLoot:Pour("|cff33ff99PastLoot|r: "..DebugLine)
-  end
+	local DebugLine, Counter
+	if ( PastLoot.DebugVar == true ) then
+		if ( self.GetName ) then
+			DebugLine = "("..(self:GetName() or "")..") "
+		else
+			DebugLine = ""
+		end
+		for Counter = 1, select("#", ...) do
+			DebugLine = DebugLine..select(Counter, ...)
+		end
+		-- PastLoot:Print(_G[PastLoot.db.profile.OutputFrame], DebugLine)
+		PastLoot:Pour("|cff33ff99PastLoot|r: "..DebugLine)
+	end
 end
 
 PastLoot:SetDefaultModulePrototype(PastLoot.Prototypes)
 PastLoot:SetDefaultModuleState(false)
 
 function PastLoot:IsModuleEnabled(Info)
-  return self.modules[Info.arg].enabledState
+	return self.modules[Info.arg].enabledState
 end
 
 function PastLoot:SetModuleEnabled(Info, Value)
-  local Module = Info.arg
-  self.db.profile.Modules[Module].Status = Value
-  if ( Value ) then
-    self:EnableModule(Module)
-  else
-    self:DisableModule(Module)
-  end
-  self:CheckRuleTables()
-  self:Rules_RuleList_OnScroll()
-  self:DisplayCurrentRule()
-  -- self:CountEnabledModules()
+	local Module = Info.arg
+	self.db.profile.Modules[Module].Status = Value
+	if ( Value ) then
+		self:EnableModule(Module)
+	else
+		self:DisableModule(Module)
+	end
+	self:CheckRuleTables()
+	self:Rules_RuleList_OnScroll()
+	self:DisplayCurrentRule()
+	-- self:CountEnabledModules()
 end
 
 local Modules_ScrollFrame_RowSpacing = 3
 local Modules_ScrollFrame_InitialHeight = 10
 function PastLoot:SetupModulesOptionsTables()
-  local Module
-  for Key, Value in self:IterateModules() do
-    Module = Value:GetName()
-    self.db.profile.Modules[Module] = self.db.profile.Modules[Module] or {}
-    if ( not self.OptionsTable.args.Modules.args[Module] ) then
-      self.OptionsTable.args.Modules.args[Module] = {
-        ["name"] = Module,
-        ["type"] = "group",
-        ["inline"] = true,
-        ["args"] = {
-          ["Enabled"] = {
-            ["name"] = L["Enabled"],
-            ["desc"] = L["Enable / Disable this module."],
-            ["type"] = "toggle",
-            ["order"] = 0,
-            ["get"] = "IsModuleEnabled",
-            ["set"] = "SetModuleEnabled",
-            ["arg"] = Module,
-          },
-        },
-      }
-    end
-  end
+	local Module
+	for Key, Value in self:IterateModules() do
+		Module = Value:GetName()
+		self.db.profile.Modules[Module] = self.db.profile.Modules[Module] or {}
+		if ( not self.OptionsTable.args.Modules.args[Module] ) then
+			self.OptionsTable.args.Modules.args[Module] = {
+				["name"] = Module,
+				["type"] = "group",
+				["inline"] = true,
+				["args"] = {
+					["Enabled"] = {
+						["name"] = L["Enabled"],
+						["desc"] = L["Enable / Disable this module."],
+						["type"] = "toggle",
+						["order"] = 0,
+						["get"] = "IsModuleEnabled",
+						["set"] = "SetModuleEnabled",
+						["arg"] = Module,
+					},
+				},
+			}
+		end
+	end
 end
 
 function PastLoot:TempIsException()
-  return false
+	return false
 end
 
 function PastLoot:TempSetException()
