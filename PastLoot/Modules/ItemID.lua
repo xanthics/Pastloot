@@ -43,6 +43,35 @@ end
 
 module.Widget = module:CreateWidget()
 
+local function compare(a, b)
+	return a[1]:lower() < b[1]:lower()
+end
+
+-- return true if the tables are different
+local function simplediff(a, b)
+	if #a ~= #b then return true end
+	for i=1, #a do
+		if a[i][1] ~= b[i][1] then return true end
+	end
+	return false
+end
+
+local function simplecopytable(a)
+	if ( not a or type(a) ~= "table" ) then
+		return a
+	end
+	local b
+	b = {}
+	for k, v in pairs(a) do
+		if ( type(v) ~= "table" ) then
+			b[k] = v
+		else
+			b[k] = simplecopytable(v)
+		end
+	end
+	return b
+end
+
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
 	local Data = module:GetConfigOption(module_key, RuleNum)
@@ -62,6 +91,19 @@ function module.Widget:GetData(RuleNum)
 			Data = nil
 			Changed = true
 		end
+		-- remove duplicates
+		local temp = simplecopytable(Data)
+		local hash = {}
+		Data = {}
+
+		for _, v in ipairs(temp) do
+			if (not hash[v[1]]) then
+				Data[#Data + 1] = v
+				hash[v] = true
+			end
+		end
+		table.sort(Data, compare)
+		if simplediff(temp, Data) then Changed = true end
 	end
 	if (Changed) then
 		module:SetConfigOption(module_key, Data)
