@@ -50,26 +50,43 @@ end
 -- return true if the tables are different
 local function simplediff(a, b)
 	if #a ~= #b then return true end
-	for i=1, #a do
+	for i = 1, #a do
 		if a[i][1] ~= b[i][1] then return true end
 	end
 	return false
 end
 
 local function simplecopytable(a)
-	if ( not a or type(a) ~= "table" ) then
+	if (not a or type(a) ~= "table") then
 		return a
 	end
 	local b
 	b = {}
 	for k, v in pairs(a) do
-		if ( type(v) ~= "table" ) then
+		if (type(v) ~= "table") then
 			b[k] = v
 		else
 			b[k] = simplecopytable(v)
 		end
 	end
 	return b
+end
+
+local function cleandata(a)
+	-- remove duplicates
+	local temp = simplecopytable(a)
+	local hash = {}
+	a = {}
+
+	for _, v in ipairs(temp) do
+		if (not hash[v[1]]) then
+			a[#a + 1] = v
+			hash[v[1]] = true
+		end
+	end
+	table.sort(a, compare)
+	if simplediff(temp, a) then return true, a end
+	return false, a
 end
 
 -- Local function to get the data and make sure it's valid data
@@ -91,19 +108,6 @@ function module.Widget:GetData(RuleNum)
 			Data = nil
 			Changed = true
 		end
-		-- remove duplicates
-		local temp = simplecopytable(Data)
-		local hash = {}
-		Data = {}
-
-		for _, v in ipairs(temp) do
-			if (not hash[v[1]]) then
-				Data[#Data + 1] = v
-				hash[v[1]] = true
-			end
-		end
-		table.sort(Data, compare)
-		if simplediff(temp, Data) then Changed = true end
 	end
 	if (Changed) then
 		module:SetConfigOption(module_key, Data)
@@ -123,6 +127,7 @@ function module.Widget:AddNewFilter()
 		false
 	}
 	table.insert(Value, NewTable)
+	_, Value = cleandata(Value)
 	module:SetConfigOption(module_key, Value)
 end
 
@@ -183,5 +188,6 @@ end
 function module:SetItemName(Frame)
 	local Value = self.Widget:GetData()
 	Value[self.FilterIndex][1] = Frame:GetText()
+	_, Value = cleandata(Value)
 	self:SetConfigOption(module_key, Value)
 end
