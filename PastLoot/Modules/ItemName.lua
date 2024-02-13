@@ -123,7 +123,6 @@ function module.Widget:GetData(RuleNum)
 			end
 			table.sort(Data, compare)
 			if simplediff(temp, Data) then Changed = true end
-
 		else
 			Data = nil
 			Changed = true
