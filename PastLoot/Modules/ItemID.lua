@@ -99,7 +99,7 @@ function module.Widget:GetData(RuleNum)
 		for _, v in ipairs(temp) do
 			if (not hash[v[1]]) then
 				Data[#Data + 1] = v
-				hash[v] = true
+				hash[v[1]] = true
 			end
 		end
 		table.sort(Data, compare)

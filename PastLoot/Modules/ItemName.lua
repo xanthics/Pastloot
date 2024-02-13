@@ -118,7 +118,7 @@ function module.Widget:GetData(RuleNum)
 			for _,v in ipairs(temp) do
 			   if (not hash[v[1]..v[2]]) then
 				   Data[#Data+1] = v
-				   hash[v] = true
+				   hash[v[1]..v[2]] = true
 			   end
 			end
 			table.sort(Data, compare)
@@ -193,25 +193,24 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	module.CurrentMatch = itemObj.name
+	module.CurrentMatch = string.lower(itemObj.name)
 	module:Debug("Item name: " .. (module.CurrentMatch or ""))
 end
 
 function module.Widget:GetMatch(RuleNum, Index)
 	local RuleValue = self:GetData(RuleNum)
-	local Name, Type = RuleValue[Index][1], RuleValue[Index][2]
+	local Name, Type = string.lower(RuleValue[Index][1]), RuleValue[Index][2]
 	if (Type == "Exact") then
-		if (string.lower(module.CurrentMatch) == string.lower(Name)) then
+		if (module.CurrentMatch == Name) then
 			module:Debug("Found item name (exact)")
 			return true
 		end
 	else
-		Name = string.lower(Name)
 		local UseRegEx = module:GetProfileVariable("UseRegEx")
 		if (not UseRegEx) then
 			Name = string.gsub(Name, "([%%%$%(%)%.%[%]%*%+%-%?%^])", "%%%1")
 		end
-		if (string.find(string.lower(module.CurrentMatch), Name)) then
+		if (string.find(module.CurrentMatch, Name)) then
 			module:Debug("Found item name (partial)")
 			return true
 		end
