@@ -1,4 +1,4 @@
-local VERSION = "4.1 r135"
+﻿local VERSION = "4.1 r135"
 PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0",
 	"LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
@@ -37,10 +37,23 @@ local function handleMouseover(cmdname)
 			local item = PastLoot:InitItem(link)
 			return tostring(item.id)
 		else
-			return name
+			return name:lower()
 		end
 	end
 	PastLoot:Pour("No valid item tooltip found.")
+end
+
+local function dupcheck(a, b)
+	if #a == 2 then
+		for i=1, #a do
+			if (a[i][2] == "Exact") and a[i][1]:lower() == b then return true end
+		end
+	else
+		for i=1, #a do
+			if a[i][1] == b then return true end
+		end
+	end
+	return false
 end
 
 local function handleAddRemove(value, cmdname, dbkey, example)
@@ -61,20 +74,30 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 	if command then
 		if flag == "add" then
 			PastLoot.db.profile.Rules[idx][dbkey] = PastLoot.db.profile.Rules[idx][dbkey] or {}
-			if cmdname == "IDRule" then
-				table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, false})
+			-- check if already in rule
+			if not dupcheck(PastLoot.db.profile.Rules[idx][dbkey], command) then
+				if cmdname == "IDRule" then
+					table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, false})
+				else
+
+					table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, "Exact", false})
+				end
+				PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
 			else
-				table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, "Exact", false})
+				PastLoot:Pour("Item already present in Rule, skipping.")
 			end
 		elseif PastLoot.db.profile.Rules[idx][dbkey] then
+			local found = false
 			for i,v in pairs(PastLoot.db.profile.Rules[idx][dbkey]) do
 				if v[1]:lower() == command then
+					found = true
 					table.remove(PastLoot.db.profile.Rules[idx][dbkey], i)
+					PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
 					break
 				end
 			end
+			if not found then PastLoot:Pour("Item not found in Rule.") end
 		end
-		PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
 	end
 end
 
