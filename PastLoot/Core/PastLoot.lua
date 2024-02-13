@@ -1,4 +1,4 @@
-﻿local VERSION = "4.1 r135"
+local VERSION = "4.1 r135"
 PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0",
 	"LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
@@ -73,7 +73,6 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 					break
 				end
 			end
-		else
 		end
 		PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
 	end

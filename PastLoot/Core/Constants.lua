@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
+local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 
 PastLoot.DefaultTemplate = {

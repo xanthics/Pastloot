@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):NewLocale("PastLoot", "enUS", true)
+local L = LibStub("AceLocale-3.0"):NewLocale("PastLoot", "enUS", true)
 if not L then return end
 L["Active Filters"] = true
 L["Active Filters_Desc"] = [=[Select a filter to modify, or shift-right-click to remove this filter

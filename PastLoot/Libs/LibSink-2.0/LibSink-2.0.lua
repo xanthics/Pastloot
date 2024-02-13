@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Name: Sink-2.0
 Revision: $Rev: 71 $
 Author(s): Rabbit (rabbit.magtheridon@gmail.com), Antiarc (cheal@gmail.com)

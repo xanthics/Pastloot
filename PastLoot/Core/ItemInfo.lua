@@ -1,4 +1,4 @@
-﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
+local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 
 local function fillItemInfo(item)
 	local name, _, quality, iLevel, reqLevel, class, subclass, maxStack, equipSlot, texture, vendorPrice = GetItemInfo(item.link)

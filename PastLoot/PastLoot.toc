@@ -1,4 +1,4 @@
-﻿## Interface: 30300
+## Interface: 30300
 ## Title: PastLoot
 ## Author: Xan.  PassLoot by Odlaw
 ## Version: 0.5

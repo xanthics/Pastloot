@@ -1,4 +1,4 @@
-﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
+local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 
 -- Not using AceGUI until I decide to make my own multi-tier drop down menu widget.
