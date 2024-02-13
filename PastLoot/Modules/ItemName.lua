@@ -1,4 +1,4 @@
-﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
+local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 
 --[[
@@ -63,6 +63,37 @@ end
 
 module.Widget = module:CreateWidget()
 
+local function compare(a, b)
+	local atest = a[1]:lower()
+	local btext = b[1]:lower()
+	return (atest < btext) or (atest == btext and a[2] < b[2])
+end
+
+-- return true if the tables are different
+local function simplediff(a, b)
+	if #a ~= #b then return true end
+	for i=1, #a do
+		if a[i][1] ~= b[i][1] or a[i][2] ~= b[i][2] then return true end
+	end
+	return false
+end
+
+local function simplecopytable(a)
+	if ( not a or type(a) ~= "table" ) then
+		return a
+	end
+	local b
+	b = {}
+	for k, v in pairs(a) do
+		if ( type(v) ~= "table" ) then
+			b[k] = v
+		else
+			b[k] = simplecopytable(v)
+		end
+	end
+	return b
+end
+
 -- Local function to get the data and make sure it's valid data
 function module.Widget:GetData(RuleNum)
 	local Data = module:GetConfigOption(module_key, RuleNum)
@@ -79,6 +110,20 @@ function module.Widget:GetData(RuleNum)
 					Changed = true
 				end
 			end
+			-- remove duplicates
+			local temp = simplecopytable(Data)
+			local hash = {}
+			Data = {}
+
+			for _,v in ipairs(temp) do
+			   if (not hash[v[1]..v[2]]) then
+				   Data[#Data+1] = v
+				   hash[v] = true
+			   end
+			end
+			table.sort(Data, compare)
+			if simplediff(temp, Data) then Changed = true end
+
 		else
 			Data = nil
 			Changed = true
