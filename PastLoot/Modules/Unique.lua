@@ -56,27 +56,9 @@ end
 
 module.Widget = module:CreateWidget()
 
--- Local function to get the data and make sure it's valid data
+-- Local function to get the data or return an empty table if no data found
 function module.Widget:GetData(RuleNum)
-	local Data = module:GetConfigOption(module_key, RuleNum)
-	local Changed = false
-	if (Data) then
-		if (type(Data) == "table" and #Data > 0) then
-			for Key, Value in ipairs(Data) do
-				if (type(Value) ~= "table" or type(Value[1]) ~= "number") then
-					Data[Key] = { module.NewFilterValue, false }
-					Changed = true
-				end
-			end
-		else
-			Data = nil
-			Changed = true
-		end
-	end
-	if (Changed) then
-		module:SetConfigOption(module_key, Data)
-	end
-	return Data or {}
+	return module:GetConfigOption(module_key, RuleNum) or {}
 end
 
 function module.Widget:GetNumFilters(RuleNum)

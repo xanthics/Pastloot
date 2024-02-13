@@ -74,31 +74,9 @@ end
 
 module.Widget, module.DropDownEditBox = module:CreateWidget()
 
--- Local function to get the data and make sure it's valid data
+-- Local function to get the data or return an empty table if no data found
 function module.Widget:GetData(RuleNum)
-	local Data = module:GetConfigOption(module_key, RuleNum)
-	local Changed = false
-	if (Data) then
-		if (type(Data) == "table" and #Data > 0) then
-			for Key, Value in ipairs(Data) do
-				if (type(Value) ~= "table" or type(Value[1]) ~= "number" or (type(Value[2]) ~= "number" and type(Value[2]) ~= "string")) then
-					Data[Key] = {
-						module.NewFilterValue_LogicalOperator,
-						module.NewFilterValue_Comparison,
-						false
-					}
-					Changed = true
-				end
-			end
-		else
-			Data = nil
-			Changed = true
-		end
-	end
-	if (Changed) then
-		module:SetConfigOption(module_key, Data)
-	end
-	return Data or {}
+	return module:GetConfigOption(module_key, RuleNum) or {}
 end
 
 function module.Widget:GetNumFilters(RuleNum)
@@ -199,7 +177,7 @@ module.Widget.Environment = {
 	[L["level"]] = 0,
 }
 module.Widget.CachedFunc, module.Widget.CachedError = {},
-		{} -- A list of functions and errors we have already tried loading
+	{} -- A list of functions and errors we have already tried loading
 function module.Widget:Evaluate(Logic)
 	self.Environment[L["level"]] = UnitLevel("player")
 	local Function, Error = self.CachedFunc[Logic], self.CachedError[Logic]
@@ -208,7 +186,7 @@ function module.Widget:Evaluate(Logic)
 		self.CachedFunc[Logic], self.CachedError[Logic] = Function, Error
 	end
 	if (Function and not Error) then
-		setfenv(Function, self.Environment)        -- Limit what the loaded logic string can access
+		setfenv(Function, self.Environment)    -- Limit what the loaded logic string can access
 		local Success, ReturnValue = pcall(Function) -- Catch errors.
 		if (Success) then
 			return ReturnValue

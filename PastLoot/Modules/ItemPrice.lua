@@ -199,11 +199,13 @@ function module:CreateDropDown()
 	_G[DropDown:GetName() .. "Text"]:SetJustifyH("CENTER")
 	UIDropDownMenu_SetWidth(DropDown, 120)
 	DropDown:SetScript("OnEnter",
-		function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
+		function() self:ShowTooltip(L["Item Price"],
+				L["Selected rule will only match items when compared to vendor value."]) end)
 	DropDown:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	local DropDownButton = _G[DropDown:GetName() .. "Button"]
 	DropDownButton:SetScript("OnEnter",
-		function() self:ShowTooltip(L["Item Price"], L["Selected rule will only match items when compared to vendor value."]) end)
+		function() self:ShowTooltip(L["Item Price"],
+				L["Selected rule will only match items when compared to vendor value."]) end)
 	DropDownButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	DropDown.Title = DropDown:CreateFontString(DropDown:GetName() .. "Title", "BACKGROUND", "GameFontNormalSmall")
 	DropDown.Title:SetParent(DropDown)
@@ -243,31 +245,9 @@ end
 
 module.Widget = module:CreateWidget()
 
--- Local function to get the data and make sure it's valid data
+-- Local function to get the data or return an empty table if no data found
 function module.Widget:GetData(RuleNum)
-	local Data = module:GetConfigOption("ItemPrice", RuleNum)
-	local Changed = false
-	if (Data) then
-		if (type(Data) == "table" and #Data > 0) then
-			for Key, Value in ipairs(Data) do
-				if (type(Value) ~= "table" or type(Value[1]) ~= "number" or type(Value[2]) ~= "number") then
-					Data[Key] = {
-						module.NewFilterValue_LogicalOperator,
-						module.NewFilterValue_Comparison,
-						false
-					}
-					Changed = true
-				end
-			end
-		else
-			Data = nil
-			Changed = true
-		end
-	end
-	if (Changed) then
-		module:SetConfigOption("ItemPrice", Data)
-	end
-	return Data or {}
+	return module:GetConfigOption(module_key, RuleNum) or {}
 end
 
 function module.Widget:GetNumFilters(RuleNum)
