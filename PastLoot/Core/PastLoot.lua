@@ -45,11 +45,11 @@ end
 
 local function dupcheck(a, b)
 	if #a == 2 then
-		for i=1, #a do
+		for i = 1, #a do
 			if (a[i][2] == "Exact") and a[i][1]:lower() == b then return true end
 		end
 	else
-		for i=1, #a do
+		for i = 1, #a do
 			if a[i][1] == b then return true end
 		end
 	end
@@ -63,9 +63,10 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 		idx = tonumber(idx)
 	end
 	if not command or not idx or (flag ~= "add" and flag ~= "remove") or not PastLoot.db.profile.Rules[idx] then
-		PastLoot:Pour("This command requires a valid Rule Number, the operation 'add' or 'remove', and either the value to add or 'mouseover' to use the current tooltip.")
-		PastLoot:Pour("Example: /pastloot "..cmdname.." 1 add "..example)
-		PastLoot:Pour("Example: /pastloot "..cmdname.." 1 remove mouseover")
+		PastLoot:Pour(
+		"This command requires a valid Rule Number, the operation 'add' or 'remove', and either the value to add or 'mouseover' to use the current tooltip.")
+		PastLoot:Pour("Example: /pastloot " .. cmdname .. " 1 add " .. example)
+		PastLoot:Pour("Example: /pastloot " .. cmdname .. " 1 remove mouseover")
 		return
 	end
 	if command == "mouseover" then
@@ -77,22 +78,21 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 			-- check if already in rule
 			if not dupcheck(PastLoot.db.profile.Rules[idx][dbkey], command) then
 				if cmdname == "IDRule" then
-					table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, false})
+					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, false })
 				else
-
-					table.insert(PastLoot.db.profile.Rules[idx][dbkey], {command, "Exact", false})
+					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, "Exact", false })
 				end
-				PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
+				PastLoot:Pour("Operation: " .. flag .. ", rule " .. idx .. ", value '" .. command .. "' complete.")
 			else
 				PastLoot:Pour("Item already present in Rule, skipping.")
 			end
 		elseif PastLoot.db.profile.Rules[idx][dbkey] then
 			local found = false
-			for i,v in pairs(PastLoot.db.profile.Rules[idx][dbkey]) do
+			for i, v in pairs(PastLoot.db.profile.Rules[idx][dbkey]) do
 				if v[1]:lower() == command then
 					found = true
 					table.remove(PastLoot.db.profile.Rules[idx][dbkey], i)
-					PastLoot:Pour("Operation: "..flag..", rule "..idx..", value '"..command.."' complete.")
+					PastLoot:Pour("Operation: " .. flag .. ", rule " .. idx .. ", value '" .. command .. "' complete.")
 					break
 				end
 			end
@@ -239,7 +239,7 @@ PastLoot.OptionsTable = {
 				["AllowMultipleConfirmPopups"] = {
 					["name"] = L["Allow Multiple Confirm Popups"],
 					["desc"] = L
-							["Checking this will disable the exclusive bit to allow multiple confirmation of loot roll popups"],
+						["Checking this will disable the exclusive bit to allow multiple confirmation of loot roll popups"],
 					["type"] = "toggle",
 					["order"] = 20,
 					["arg"] = { "AllowMultipleConfirmPopups" },
@@ -379,7 +379,8 @@ function PastLoot:OnInitialize()
 	self.Tooltip = self:Create_PastLootTooltip()
 	-- self.BlizOptionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("PastLoot", L["PastLoot"])
 	self.BlizOptionsFrames = {
-		["Modules"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Modules"], L["PastLoot"], "Modules"),
+		["Modules"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Modules"], L["PastLoot"],
+			"Modules"),
 		["GeneralOptions"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Options"], L["PastLoot"],
 			"Options"),
 		["Profiles"] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(L["PastLoot"], L["Profiles"], L["PastLoot"],
@@ -394,13 +395,11 @@ function PastLoot:OnInitialize()
 end
 
 local function update_sets()
-	PastLoot.setIDs = {} -- clear any existing set items
+	PastLoot.setGUIDs = {} -- clear any existing set items
 	for i = 1, GetNumEquipmentSets() do
 		local name = GetEquipmentSetInfo(i)
-		for _, v in pairs(GetEquipmentSetItemIDs(name)) do
-			if v > 1 then
-				PastLoot.setIDs[v] = true
-			end
+		for _, v in pairs(GetEquipmentSetItemGUIDs(name)) do
+				PastLoot.setGUIDs[v] = true --  This will add 0x0 to the table, but no valid item would have that id
 		end
 	end
 end
@@ -429,7 +428,7 @@ function PastLoot:OnEnable()
 	update_sets()
 	self:SetupModulesOptionsTables() -- Creates Module header frames and lays them out in the scroll frame
 	self:OnProfileChanged()
-	self.LastRolls = {}             -- Last 10 rolls.
+	self.LastRolls = {}           -- Last 10 rolls.
 end
 
 function PastLoot:OnDisable()
@@ -500,27 +499,25 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
-			if itemObj then
-				if itemObj.vendorPrice > 0 then
-					local result = PastLoot:EvaluateItem(itemObj)
-					if result == 2 or result == 3 then
-						amount = amount + itemObj.count * itemObj.vendorPrice
-						if sold and strlen(sold) + strlen(itemObj.link) > 255 then
-							print("Sold: " .. sold)
-							sold = nil
-						end
-						-- only show count if > 1
-						local c = ""
-						if itemObj.count > 1 then
-							c = itemObj.count .. "x "
-						end
-						if sold then
-							sold = sold .. ", " .. c .. itemObj.link
-						else
-							sold = c .. itemObj.link
-						end
-						UseContainerItem(bag, slot)
+			if itemObj and itemObj.vendorPrice and itemObj.vendorPrice > 0 then
+				local result = PastLoot:EvaluateItem(itemObj)
+				if result == 2 or result == 3 then
+					amount = amount + itemObj.count * itemObj.vendorPrice
+					if sold and strlen(sold) + strlen(itemObj.link) > 255 then
+						print("Sold: " .. sold)
+						sold = nil
 					end
+					-- only show count if > 1
+					local c = ""
+					if itemObj.count > 1 then
+						c = itemObj.count .. "x "
+					end
+					if sold then
+						sold = sold .. ", " .. c .. itemObj.link
+					else
+						sold = c .. itemObj.link
+					end
+					UseContainerItem(bag, slot)
 				end
 			end
 		end
@@ -657,7 +654,7 @@ function PastLoot:EvaluateItem(itemObj)
 			end --MatchedRule
 		end -- SkipRules
 		self:Debug("Rule not matched, trying another")
-	end  --RuleKey, RuleValue
+	end --RuleKey, RuleValue
 	self:Debug("Ran out of rules, ignoring")
 	if (self.TestLink) then
 		self:Pour(itemObj.link .. ": " .. L["No rules matched."])

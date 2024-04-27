@@ -107,7 +107,7 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	module.CurrentMatch = PastLoot.setIDs[itemObj.id] or false
+	module.CurrentMatch = PastLoot.setGUIDs[itemObj.guid] or false
 	module:Debug("In A Set: " .. tostring(module.CurrentMatch) .. " (" .. itemObj.link .. ")")
 end
 

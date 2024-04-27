@@ -1,6 +1,19 @@
 local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
-local module = PastLoot:NewModule(L["Item Price"])
+
+--[[
+Checklist if creating a new module
+- first choose an existing module that most closely matches what you want to do
+- modify module_key, module_name, module_tooltip to unique values
+- make sure to update locales
+- Modify SetMatch and GetMatch
+- Create/Modify local functions as needed
+]]
+local module_key = "ItemPrice"
+local module_name = L["Item Price"]
+local module_tooltip = L["Selected rule will only match items when compared to vendor value."]
+
+local module = PastLoot:NewModule(module_name)
 
 module.Choices = {
 	{
@@ -32,7 +45,7 @@ module.Choices = {
 module.ConfigOptions_RuleDefaults = {
 	-- { VariableName, Default },
 	{
-		"ItemPrice",
+		module_key,
 		-- {
 		-- [1] = { Operator, Comparison, Exception }
 		-- },
@@ -199,18 +212,22 @@ function module:CreateDropDown()
 	_G[DropDown:GetName() .. "Text"]:SetJustifyH("CENTER")
 	UIDropDownMenu_SetWidth(DropDown, 120)
 	DropDown:SetScript("OnEnter",
-		function() self:ShowTooltip(L["Item Price"],
-				L["Selected rule will only match items when compared to vendor value."]) end)
+		function()
+			self:ShowTooltip(module_name,
+				module_tooltip)
+		end)
 	DropDown:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	local DropDownButton = _G[DropDown:GetName() .. "Button"]
 	DropDownButton:SetScript("OnEnter",
-		function() self:ShowTooltip(L["Item Price"],
-				L["Selected rule will only match items when compared to vendor value."]) end)
+		function()
+			self:ShowTooltip(module_name,
+				module_tooltip)
+		end)
 	DropDownButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	DropDown.Title = DropDown:CreateFontString(DropDown:GetName() .. "Title", "BACKGROUND", "GameFontNormalSmall")
 	DropDown.Title:SetParent(DropDown)
 	DropDown.Title:SetPoint("BOTTOMLEFT", DropDown, "TOPLEFT", 20, 0)
-	DropDown.Title:SetText(L["Item Price"])
+	DropDown.Title:SetText(module_name)
 	DropDown.initialize = function(...) self:DropDown_Init(...) end
 	return DropDown
 end
@@ -234,8 +251,8 @@ function module:CreateWidget()
 	Frame.Height = Frame:GetHeight()
 	Frame.Width = Frame:GetWidth()
 	Frame.Info = {
-		L["Item Price"],
-		L["Selected rule will only match items when compared to vendor value."],
+		module_name,
+		module_tooltip,
 	}
 	Frame:SetParent(nil)
 	Frame:Hide()
@@ -263,7 +280,7 @@ function module.Widget:AddNewFilter()
 		false
 	}
 	table.insert(Value, NewTable)
-	module:SetConfigOption("ItemPrice", Value)
+	module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:RemoveFilter(Index)
@@ -272,7 +289,7 @@ function module.Widget:RemoveFilter(Index)
 	if (#Value == 0) then
 		Value = nil
 	end
-	module:SetConfigOption("ItemPrice", Value)
+	module:SetConfigOption(module_key, Value)
 end
 
 function module.Widget:DisplayWidget(Index)
@@ -302,7 +319,7 @@ end
 function module.Widget:SetException(RuleNum, Index, Value)
 	local Data = self:GetData(RuleNum)
 	Data[Index][3] = Value
-	module:SetConfigOption("ItemPrice", Data)
+	module:SetConfigOption(module_key, Data)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
@@ -359,7 +376,7 @@ function module:DropDown_OnClick(Frame)
 	local Value = self.Widget:GetData()
 	local LogicalOperator = Frame.value
 	Value[self.FilterIndex][1] = LogicalOperator
-	self:SetConfigOption("ItemPrice", Value)
+	self:SetConfigOption(module_key, Value)
 	UIDropDownMenu_SetText(Frame.owner, self:GetDropDownText(LogicalOperator))
 end
 
@@ -370,7 +387,7 @@ function module:SetMoney()
 	local Value = self.Widget:GetData()
 	local Comparison = self.Widget.MoneyInputFrame:GetMoney()
 	Value[self.FilterIndex][2] = Comparison
-	self:SetConfigOption("ItemPrice", Value)
+	self:SetConfigOption(module_key, Value)
 end
 
 function module:GetItemPriceText(LogicalOperator, Comparison)
