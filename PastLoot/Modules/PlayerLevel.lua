@@ -141,7 +141,7 @@ end
 function module.Widget:GetMatch(RuleNum, Index)
 	local RuleValue = self:GetData(RuleNum)
 	local LogicalOperator = RuleValue[Index][1]
-	local Comparison = RuleValue[Index][2]
+	local Comparison = tonumber(RuleValue[Index][2])
 	if (LogicalOperator > 1) then
 		if (LogicalOperator == 2) then -- Equal To
 			if (module.CurrentMatch ~= Comparison) then
