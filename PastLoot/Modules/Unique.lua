@@ -113,18 +113,17 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 	-- Found on line 4 for heroic and/or colorblind option bop items.
 	-- Scan till line 5 or until newline character detected (patterns have a newline, not sure if anything else does)
 	Unique = 2 -- module.Choices[2] = "Not"
-	for Index = 1, math.min(5, Tooltip:NumLines()) do
-		Line = _G[Tooltip:GetName() .. "TextLeft" .. Index]
-		if (Line) then
-			LineText = Line:GetText()
-			if (LineText and LineText ~= "") then
-				if (string.find(LineText, "^\n")) then
-					break
-				end
-				if (LineText == ITEM_UNIQUE or LineText == ITEM_UNIQUE_EQUIPPABLE or LineText:match(ITEM_UNIQUE_MULTIPLE:gsub("%%d", ".+"))) then
-					Unique = 3 -- module.Unique[3] == module_key
-					break
-				end
+	PastLoot.BuildTooltipCache(itemObj)
+	local cache = PastLoot.TooltipCache
+	for Index = 1, math.min(5, #cache.Left) do
+		LineText = cache.Left[Index]
+		if (LineText and LineText ~= "") then
+			if (string.find(LineText, "^\n")) then
+				break
+			end
+			if (LineText == ITEM_UNIQUE or LineText == ITEM_UNIQUE_EQUIPPABLE or LineText:match(ITEM_UNIQUE_MULTIPLE:gsub("%%d", ".+"))) then
+				Unique = 3 -- module.Unique[3] == module_key
+				break
 			end
 		end
 	end

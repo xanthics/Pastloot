@@ -109,21 +109,20 @@ end
 function module.Widget:SetMatch(itemObj, Tooltip)
 	local TextLine, Text
 	module.CurrentMatch = 3 -- module.Choices[2] = "Unlearned"
+	PastLoot.BuildTooltipCache(itemObj)
+	local cache = PastLoot.TooltipCache
 	-- Found on line 7 of Reins of the Bronze Drake
-	for Index = 2, Tooltip:NumLines() do
-		TextLine = _G[Tooltip:GetName() .. "TextLeft" .. Index]
-		if (TextLine) then
-			Text = TextLine:GetText()
-			-- Search for the "Already known" text unless we hit a newline character at the beginning of a line.
-			-- new line is usually a recipe.  We don't want to scan the item a recipe makes
-			-- as that might be a mount (mechano-hog / chopper) that might be learned.
-			-- Might be items other than recipes that are similar...
-			if (Text == nil or string.find(Text, "^\n")) then
-				break
-			elseif (Text == ITEM_SPELL_KNOWN) then
-				module.CurrentMatch = 2 -- module.Choices[2] = "Learned"
-				break
-			end
+	for Index = 2, #cache.Left do
+		Text = cache.Left[Index]
+		-- Search for the "Already known" text unless we hit a newline character at the beginning of a line.
+		-- new line is usually a recipe.  We don't want to scan the item a recipe makes
+		-- as that might be a mount (mechano-hog / chopper) that might be learned.
+		-- Might be items other than recipes that are similar...
+		if (Text == nil or string.find(Text, "^\n")) then
+			break
+		elseif (Text == ITEM_SPELL_KNOWN) then
+			module.CurrentMatch = 2 -- module.Choices[2] = "Learned"
+			break
 		end
 	end
 	module:Debug("Learned Item: " .. module.CurrentMatch .. " (" .. module:GetLearnedItemText(module.CurrentMatch) .. ")")

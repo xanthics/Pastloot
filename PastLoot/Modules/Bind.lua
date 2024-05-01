@@ -132,29 +132,27 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	local Line, LineText
+	local LineText
 	local Bind
 	-- Found on line 2 for most items
 	-- Found on line 3 for Heroic / colorblind mode items
 	-- Scan till line 4 or until newline character detected (patterns have a newline, not sure if anything else does)
 	Bind = 2 -- module.Bind[2] = "None"
-	for Index = 2, math.min(4, Tooltip:NumLines()) do
-		Line = _G[Tooltip:GetName() .. "TextLeft" .. Index]
-		if (Line) then
-			LineText = Line:GetText()
-			if (LineText and LineText ~= "") then
-				if (string.find(LineText, "^\n")) then
+	PastLoot.BuildTooltipCache(itemObj)
+	local cache = PastLoot.TooltipCache
+	for Index = 2, math.min(4, #cache.Left) do
+		LineText = cache.Left[Index]
+		if (LineText and LineText ~= "") then
+			if (string.find(LineText, "^\n")) then break end
+			for Key = 3, #module.Choices do --Don't check for Key 1 (Any) or 2 (None)
+				if (LineText == module.Choices[Key].Type) then
+					Bind = Key
 					break
-				end
-				for Key = 3, #module.Choices do --Don't check for Key 1 (Any) or 2 (None)
-					if (LineText == module.Choices[Key].Type) then
-						Bind = Key
-						break
-					end
 				end
 			end
 		end
 	end
+
 	module.CurrentMatch = Bind
 	module:Debug("Bind Type: " .. Bind .. " (" .. module:GetBindSlotText(Bind) .. ")")
 end

@@ -117,40 +117,16 @@ end
 function module.Widget:SetMatch(itemObj, Tooltip)
 	local Line, Text, Red, Green, Blue, Alpha
 	local Usable = 2 -- Choices 2 is usable
+	PastLoot.BuildTooltipCache(itemObj)
+	local cache = PastLoot.TooltipCache
+
 	-- Found on line 3 of most items
 	-- Found on line 4 or most items that are unique items
 	-- Found on line 4 of heroic/colorblind mode items
 	-- Found on line 5 of heroic/colorblind that are unique items
 	-- Found on line 7 of bop, unique mounts with level requirement and riding requirements (reins of the bronze drake)
-	for Index = 2, Tooltip:NumLines() do
-		-- print("checking line "..Index)
-		Line = _G[Tooltip:GetName() .. "TextLeft" .. Index]
-		if (Line) then
-			Text = Line:GetText()
-			if (Text and Text ~= "") then
-				Red, Green, Blue, Alpha = Line:GetTextColor()
-				if (string.find(Text, "^\n")) then
-					break
-				end
-				if (self:ColorCheck(Red, Green, Blue, Alpha)) then
-					Usable = 3 -- Unussable
-					break
-				end
-			end
-		end
-		Line = _G[Tooltip:GetName() .. "TextRight" .. Index]
-		if (Line) then
-			Text = Line:GetText()
-			if (Text and Text ~= "") then -- Check right side, as it might be armor type/weapon stuff
-				Red, Green, Blue, Alpha = Line:GetTextColor()
-				if (self:ColorCheck(Red, Green, Blue, Alpha)) then
-					Usable = 3 -- Unussable
-					break
-				end
-			end
-		end
-	end
-	module.CurrentMatch = Usable
+	
+	module.CurrentMatch = cache.usable and 2 or 3
 	module:Debug("Usable: " .. Usable .. " (" .. module:GetUsableText(Usable) .. ")")
 end
 
