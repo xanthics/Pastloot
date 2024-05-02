@@ -14,13 +14,13 @@ local defaults = {
 		["Rules"] = {},
 		["Modules"] = {},
 		["SinkOptions"] = {},
-		-- ["WindowPos"] = {  -- Unused after moving Everything to Blizz Options Frame
-		-- ["X"] = nil,
-		-- ["Y"] = nil,
-		-- },
 		["SkipRules"] = false,
 		["SkipWarning"] = true,
 		["DisplayUnknownVars"] = true,
+		["DeleteImmediate"] = "noval",
+		["KeepOpen"] = 5,
+		["DeleteVendor"] = false,
+		["ShowDelete"] = true,
 		["MessageText"] = {
 			["keep"] = L["keeping %item% (%rule%)"],
 			["vendor"] = L["vendoring %item% (%rule%)"],
@@ -286,6 +286,57 @@ PastLoot.OptionsTable = {
 					["confirm"] = true,
 					["confirmText"] = L["CLEAN RULES DESC"],
 				},
+				["Options"] = {
+					["name"] = "Settings for Delete Rules", --L["Options"],
+					["order"] = 70,
+					["desc"] = L["General Options"],
+					["type"] = "group",
+					["inline"] = true,
+					["args"] = {
+						["DeleteImmediate"] = {
+							["name"] = L["DeleteImmediate"],
+							["desc"] = L["DeleteImmediateDesc"],
+							["type"] = "select",
+							["order"] = 10,
+							["arg"] = { "DeleteImmediate" },
+							["width"] = "normal",
+							["values"] = {
+								["noval"] = L["NoValDesc"],
+								["anyval"] = L["AnyValDesc"],
+							},
+							["style"] = "dropdown",
+						},
+						["KeepOpenSlots"] = {
+							["name"] = L["KeepOpenSlots"],
+							["desc"] = L["KeepOpenSlotsDesc"],
+							["type"] = "range",
+							["order"] = 20,
+							["arg"] = { "KeepOpen" },
+							["width"] = "normal",
+							["min"] = 0,
+							["max"] = 168,
+							["softMin"] = 0,
+							["softMax"] = 10,
+							["step"] = 1,
+						},
+						["DeleteVendor"] = {
+							["name"] = L["DeleteVendor"], --L["Skip Warning"],
+							["desc"] = L["DeleteVendorDesc"],
+							["type"] = "toggle",
+							["order"] = 30,
+							["arg"] = { "DeleteVendor" },
+							["width"] = "full",
+						},
+						["ShowDelete"] = {
+							["name"] = L["ShowDelete"], --L["Skip Warning"],
+							["desc"] = L["ShowDeleteDesc"],
+							["type"] = "toggle",
+							["order"] = 40,
+							["arg"] = { "ShowDelete" },
+							["width"] = "full",
+						},
+					},
+				},
 			},
 		},
 		["Modules"] = {
@@ -395,7 +446,7 @@ function PastLoot:OnInitialize()
 	-- PanelTemplates_SetTab(PastLoot_TabbedMenuContainer, 1)      -- 1 because we want tab 1 selected.
 	-- PanelTemplates_UpdateTabs(PastLoot_TabbedMenuContainer)
 	self.DropDownFrame = CreateFrame("Frame", "PastLoot_DropDownMenu", nil, "UIDropDownMenuTemplate")
-	PastLoot.EvalCache = {} -- item cache so we don't repeat item evaluations
+	PastLoot:ResetCache()
 end
 
 local function update_sets()
@@ -516,12 +567,18 @@ local function shallow_copy(t)
 	return t2
 end
 
+local function sort_delete(a, b)
+	return a.value < b.value
+end
+
 -- Bucket Event to handle updating the item cache
 function PastLoot:UpdateBags(...)
 	local currentTime = GetTime()
+	-- if we are resetting the cache, only do that since any updates or single item deletes will be useless
 	if QueueOperations["reset"] then
-		PastLoot.EvalCache = {}
+		PastLoot:ResetCache()
 	else
+		-- re-evaluate any items based on guid
 		for k, _ in pairs(QueueOperations["GUIDs"]) do
 			if PastLoot.EvalCache[k] then
 				local result, match = PastLoot:EvaluateItem(PastLoot.EvalCache[k]["itemObj"])
@@ -530,7 +587,8 @@ function PastLoot:UpdateBags(...)
 				PastLoot.EvalCache[k]["lastUpdate"] = currentTime
 			end
 		end
-		if #QueueOperations["IDs"] > 0 then
+		-- forget items based on item id
+		if type(next(QueueOperations["IDs"])) ~= "nil" then
 			for k, v in pairs(PastLoot.EvalCache) do
 				if QueueOperations["IDs"][v["itemObj"].id] or v["lastUpdate"] + 900 < currentTime then -- TODO: rewrite with config time
 					PastLoot.EvalCache[k] = nil
@@ -538,7 +596,9 @@ function PastLoot:UpdateBags(...)
 			end
 		end
 	end
+	-- we processed the update, reset the queue
 	QueueOperations = { ["reset"] = false, ["GUIDs"] = {}, ["IDs"] = {} }
+	-- cache any uncached items in bag
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local guid = GetContainerItemGUID(bag, slot)
@@ -552,6 +612,47 @@ function PastLoot:UpdateBags(...)
 					["lastUpdate"] = currentTime
 				}
 			end
+		end
+	end
+	-- calculate free space
+	local freespace = 0
+	for i = 0, 4 do
+		freespace = freespace + GetContainerNumFreeSlots(i)
+	end
+	-- iterate cache, build a guid->value pool for potentially deletable items
+	local deletecache = {}
+	for guid, data in pairs(PastLoot.EvalCache) do
+		if data["result"] == 3 or (self.db.profile.DeleteVendor and data["result"] == 2) then
+			local value
+			if self.db.profile.DeleteImmediate == "anyval" and data["result"] == 3 then
+				value = 0
+			else
+				value = data["itemObj"].stackValue
+			end
+			deletecache[#deletecache + 1] = {
+				["guid"] = guid,
+				["value"] = value,
+				["bag"] = data["itemObj"].bag,
+				["slot"] = data["itemObj"].slot,
+				["clink"] = data["itemObj"].link,
+				["rule"] = data["match"]
+			}
+		end
+	end
+	-- sort the deletion candidates based on value
+	table.sort(deletecache, sort_delete)
+	-- delete any items as required
+	local todelete = self.db.profile.KeepOpen - freespace
+	while #deletecache > 0 and (todelete > 0 or deletecache[1].value == 0) do
+		local citem = table.remove(deletecache, 1)
+		if citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
+			PickupContainerItem(citem.bag, citem.slot)
+			DeleteCursorItem()
+			local StatusMsg = self.db.profile.MessageText.destroy
+			StatusMsg = string.gsub(StatusMsg, "%%item%%", citem.clink)
+			StatusMsg = string.gsub(StatusMsg, "%%rule%%", self.db.profile.Rules[citem.rule].Desc)
+			self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " .. StatusMsg)
+			todelete = todelete - 1
 		end
 	end
 end
@@ -572,16 +673,16 @@ function PastLoot:ASCENSION_STORE_COLLECTION_ITEM_LEARNED(Event, ID, ...)
 	QueueOperations["IDs"][ID] = true
 end
 
-function PastLoot:BAG_ITEM_REMOVED(Event, Bag, Slot, ID, StackCount, ...)
+function PastLoot:BAG_ITEM_REMOVED(Bag, Slot, ID, StackCount, ...)
 	QueueOperations["IDs"][ID] = true
 end
 
-function PastLoot:BAG_ITEM_COUNT_CHANGED(Event, Bag, Slot, ID, NewStackNum, Change, ...)
+function PastLoot:BAG_ITEM_COUNT_CHANGED(Bag, Slot, ID, NewStackNum, Change, ...)
 	QueueOperations["IDs"][ID] = true
 	--	QueueOperations["BagSlots_Count"][Bag][Slot] = NewStackNum
 end
 
-function PastLoot:BAG_ITEM_REPLACED(Event, Bag, Slot, OldID, OldCount, NewID, NewCount, ...)
+function PastLoot:BAG_ITEM_REPLACED(Bag, Slot, OldID, OldCount, NewID, NewCount, ...)
 	QueueOperations["IDs"][OldID] = true
 	QueueOperations["IDs"][NewID] = true
 	--	QueueOperations["BagSlots_Location"][Bag][Slot] = true
@@ -606,6 +707,7 @@ end
 
 function PastLoot:MERCHANT_SHOW(Event, ...)
 	if Event ~= "MERCHANT_SHOW" or "Fix-o-Tron 5000" == UnitName("target") then return end
+	PastLoot:UpdateBags() -- clear out any pending operations
 	local _, sold
 	local amount = 0
 	for bag = 0, 4 do

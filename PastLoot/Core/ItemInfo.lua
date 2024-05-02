@@ -26,6 +26,7 @@ function PastLoot:FillContainerItemInfo(item,bag,slot)
 	item.readable = readable
 	item.lootable = lootable
 	item.guid = GetContainerItemGUID(bag, slot)
+	item.stackValue = item.count * item.vendorPrice
 	return item
 end
 
