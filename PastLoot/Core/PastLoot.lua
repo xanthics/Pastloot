@@ -4,8 +4,6 @@ PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEv
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 -- local LDBIcon = LibStub("LibDBIcon-1.0")
-local AceTimer = LibStub('AceTimer-3.0')
-function AceTimer:delay_rollOnLoot(RollID, RollMethod) RollOnLoot(RollID, RollMethod) end
 
 local defaults = {
 	["profile"] = {
@@ -572,6 +570,17 @@ local function sort_delete(a, b)
 	return a.value < b.value
 end
 
+local validationQue = {}
+local deleteTimer
+local function deleteValidation()
+	while #validationQue > 0 do
+		local entry = Table.remove(validationQue)
+		if not GetContainerItemGUID(entry.bag,entry.slot) then
+			PastLoot:Pour(entry.msg)
+		end
+	end
+end
+
 -- Bucket Event to handle updating the item cache
 function PastLoot:UpdateBags(...)
 	local currentTime = GetTime()
@@ -650,7 +659,13 @@ function PastLoot:UpdateBags(...)
 			local StatusMsg = self.db.profile.MessageText.destroy
 			StatusMsg = string.gsub(StatusMsg, "%%item%%", citem.clink)
 			StatusMsg = string.gsub(StatusMsg, "%%rule%%", self.db.profile.Rules[citem.rule].Desc)
-			self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " .. StatusMsg)
+			StatusMsg = "|cff33ff99" .. L["PastLoot"] .. "|r: " .. StatusMsg
+			local validationEntry = {}
+			validationEntry.bag = citem.bag
+			validationEntry.slot = citem.slot
+			validationEntry.msg = StatusMsg
+			Table.insert(validationQue, validationEntry)
+			deleteTimer = C_Timer.NewTimer(.5, deleteValidation)
 			todelete = todelete - 1
 		end
 	end
