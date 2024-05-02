@@ -607,17 +607,16 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 	local amount = 0
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
-			local itemObj, result
+			local itemObj
 			local guid = GetContainerItemGUID(bag, slot)
 			if PastLoot.EvalCache[guid] then
 				itemObj = PastLoot.EvalCache[guid]["itemObj"]
-				result = PastLoot.EvalCache[guid]["result"]
 			else
 				itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
 			end
 			if itemObj and itemObj.vendorPrice and itemObj.vendorPrice > 0 then
-				result = result or PastLoot:EvaluateItem(itemObj)
-				if result == 2 or result == 3 then
+				local result = PastLoot:GetItemEvaluation(itemObj)
+				if result[1] == 2 or result[1] == 3 then
 					amount = amount + itemObj.count * itemObj.vendorPrice
 					if sold and strlen(sold) + strlen(itemObj.link) > 255 then
 						PastLoot:Pour("Sold: " .. sold)
