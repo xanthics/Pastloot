@@ -161,6 +161,7 @@ PastLoot.OptionsTable = {
 			["get"] = function() end,
 			["set"] = function(info, value)
 				handleAddRemove(value, "NameRule", "Items", "Turtle Meat")
+				PastLoot:ResetCache()
 			end,
 		},
 		["IDRule"] = {
@@ -171,6 +172,7 @@ PastLoot.OptionsTable = {
 			["get"] = function() end,
 			["set"] = function(info, value)
 				handleAddRemove(value, "IDRule", "ItemIDs", "3712")
+				PastLoot:ResetCache()
 			end,
 		},
 		["Options"] = {
@@ -311,6 +313,7 @@ function PastLoot:OptionsSet(Info, Value)
 		Table = Table[Info.arg[Key]]
 	end
 	Table[Info.arg[#Info.arg]] = Value
+	self:ResetCache()
 end
 
 function PastLoot:OptionsGet(Info)

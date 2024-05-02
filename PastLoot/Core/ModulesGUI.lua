@@ -251,6 +251,7 @@ function PastLoot:SetModuleEnabled(Info, Value)
 	self:Rules_RuleList_OnScroll()
 	self:DisplayCurrentRule()
 	-- self:CountEnabledModules()
+	self:ResetCache()
 end
 
 local Modules_ScrollFrame_RowSpacing = 3
