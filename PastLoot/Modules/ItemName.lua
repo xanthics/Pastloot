@@ -176,7 +176,7 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	module.CurrentMatch = string.lower(itemObj.name)
+	module.CurrentMatch = string.lower(itemObj.name or "")
 	module:Debug("Item name: " .. (module.CurrentMatch or ""))
 end
 

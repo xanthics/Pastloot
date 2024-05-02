@@ -753,7 +753,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 end
 
 function PastLoot:EvaluateItem(itemObj)
-	if not itemObj.link then return end
+	if not itemObj or not itemObj.link then return end
 	local Name = itemObj.name
 	PastLootTT:ClearLines()
 	PastLootTT:SetHyperlink(itemObj.link)
