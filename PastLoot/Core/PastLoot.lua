@@ -516,15 +516,11 @@ end
 -- Bucket Event to handle updating the item cache
 function PastLoot:UpdateBags(...)
 	local currentTime = GetTime()
-	print("Updating bags: " .. currentTime)
-	XanPrint(QueueOperations, 3)
 	if QueueOperations["reset"] then
-		print("Deleting Cache")
 		PastLoot.EvalCache = {}
 	else
 		for k, _ in pairs(QueueOperations["GUIDs"]) do
 			if PastLoot.EvalCache[k] then
-				print("Updating GUID Eval")
 				local result, match = PastLoot:EvaluateItem(PastLoot.EvalCache[k]["itemObj"])
 				PastLoot.EvalCache[k]["result"] = result or 1
 				PastLoot.EvalCache[k]["match"] = match or -1
@@ -532,12 +528,8 @@ function PastLoot:UpdateBags(...)
 			end
 		end
 		if #QueueOperations["IDs"] > 0 then
-			print("*1**")
-			XanPrint(QueueOperations["IDs"])
-			print("~~~")
 			for k, v in pairs(PastLoot.EvalCache) do
 				if QueueOperations["IDs"][v["itemObj"].id] or v["lastUpdate"] + 900 < currentTime then -- TODO: rewrite with config time
-					print("Forgetting ID")
 					PastLoot.EvalCache[k] = nil
 				end
 			end
@@ -575,33 +567,20 @@ end
 
 function PastLoot:ASCENSION_STORE_COLLECTION_ITEM_LEARNED(Event, ID, ...)
 	QueueOperations["IDs"][ID] = true
-	print("*2**")
-	XanPrint(QueueOperations, 3)
-	print("~~~")
 end
 
 function PastLoot:BAG_ITEM_REMOVED(Event, Bag, Slot, ID, StackCount, ...)
-	print(Event, Bag, Slot, ID, StackCount, ...)
 	QueueOperations["IDs"][ID] = true
-	print("*3**")
-	XanPrint(QueueOperations, 3)
-	print("~~~")
 end
 
 function PastLoot:BAG_ITEM_COUNT_CHANGED(Event, Bag, Slot, ID, NewStackNum, Change, ...)
 	QueueOperations["IDs"][ID] = true
-	print("*4**")
-	XanPrint(QueueOperations, 3)
-	print("~~~")
 	--	QueueOperations["BagSlots_Count"][Bag][Slot] = NewStackNum
 end
 
 function PastLoot:BAG_ITEM_REPLACED(Event, Bag, Slot, OldID, OldCount, NewID, NewCount, ...)
 	QueueOperations["IDs"][OldID] = true
 	QueueOperations["IDs"][NewID] = true
-	print("*5**")
-	XanPrint(QueueOperations, 3)
-	print("~~~")
 	--	QueueOperations["BagSlots_Location"][Bag][Slot] = true
 end
 
@@ -620,7 +599,6 @@ function PastLoot:EQUIPMENT_SETS_CHANGED(Event, ...)
 			QueueOperations["GUIDs"][k] = true
 		end
 	end
-	XanPrint(QueueOperations, 3)
 end
 
 function PastLoot:MERCHANT_SHOW(Event, ...)
@@ -642,7 +620,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 				if result == 2 or result == 3 then
 					amount = amount + itemObj.count * itemObj.vendorPrice
 					if sold and strlen(sold) + strlen(itemObj.link) > 255 then
-						print("Sold: " .. sold)
+						PastLoot:Pour("Sold: " .. sold)
 						sold = nil
 					end
 					-- only show count if > 1
@@ -661,8 +639,8 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 		end
 	end
 	if sold then
-		print("Sold: " .. sold)
-		print("Total: " .. GetCoinTextureString(amount))
+		PastLoot:Pour("Sold: " .. sold)
+		PastLoot:Pour("Total: " .. GetCoinTextureString(amount))
 	end
 end
 
