@@ -106,14 +106,6 @@ function module.Widget:SetException(RuleNum, Index, Value)
 	module:SetConfigOption(module_key, Data)
 end
 
-function module.Widget:ColorCheck(Red, Green, Blue, Alpha)
-	Red = math.floor(Red * 255 + 0.5)
-	Green = math.floor(Green * 255 + 0.5)
-	Blue = math.floor(Blue * 255 + 0.5)
-	Alpha = math.floor(Alpha * 255 + 0.5)
-	return (Red == 255 and Green == 32 and Blue == 32 and Alpha == 255)
-end
-
 function module.Widget:SetMatch(itemObj, Tooltip)
 	local Line, Text, Red, Green, Blue, Alpha
 	local Usable = 2 -- Choices 2 is usable
