@@ -52,10 +52,13 @@ function PastLoot:GetItemEvaluation(item)
 	initCache()
 	if not item or not item.guid then return end
 	local cache = PastLoot.EvalCache
-	local result = cache[item.guid]
-	if not result then 
-		result = {PastLoot:EvaluateItem(item)}
-		cache[item.guid] = result
+	local result
+	if cache[item.guid] and cache[item.guid]["lastUpdate"] + 900 >= GetTime() then
+		result = {cache[item.guid]["result"], cache[item.guid]["match"]}
+	else -- not cache[item.guid]
+		local r, m = PastLoot:EvaluateItem(item)
+		result = {r, m}
+		cache[item.guid] = {["itemObj"] = item, ["result"] = r, ["match"] = m, ["lastUpdate"] = GetTime()}
 	end
 	return result
 end

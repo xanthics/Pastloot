@@ -64,7 +64,7 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 	end
 	if not command or not idx or (flag ~= "add" and flag ~= "remove") or not PastLoot.db.profile.Rules[idx] then
 		PastLoot:Pour(
-		"This command requires a valid Rule Number, the operation 'add' or 'remove', and either the value to add or 'mouseover' to use the current tooltip.")
+			"This command requires a valid Rule Number, the operation 'add' or 'remove', and either the value to add or 'mouseover' to use the current tooltip.")
 		PastLoot:Pour("Example: /pastloot " .. cmdname .. " 1 add " .. example)
 		PastLoot:Pour("Example: /pastloot " .. cmdname .. " 1 remove mouseover")
 		return
@@ -392,6 +392,7 @@ function PastLoot:OnInitialize()
 	-- PanelTemplates_SetTab(PastLoot_TabbedMenuContainer, 1)      -- 1 because we want tab 1 selected.
 	-- PanelTemplates_UpdateTabs(PastLoot_TabbedMenuContainer)
 	self.DropDownFrame = CreateFrame("Frame", "PastLoot_DropDownMenu", nil, "UIDropDownMenuTemplate")
+	PastLoot.EvalCache = {} -- item cache so we don't repeat item evaluations
 end
 
 local function update_sets()
@@ -399,7 +400,7 @@ local function update_sets()
 	for i = 1, GetNumEquipmentSets() do
 		local name = GetEquipmentSetInfo(i)
 		for _, v in pairs(GetEquipmentSetItemGUIDs(name)) do
-				PastLoot.setGUIDs[v] = true --  This will add 0x0 to the table, but no valid item would have that id
+			PastLoot.setGUIDs[v] = true --  This will add 0x0 to the table, but no valid item would have that id
 		end
 	end
 end
@@ -413,11 +414,19 @@ local function BAG_CLOSE(...)
 	PastLoot.InventoryGUI:Hide()
 end
 
-local BUCKET_BAG_UPDATE
+local BUCKET_BAG_UPDATE, BUCKET_PLAYER_LEVEL_UP
 function PastLoot:OnEnable()
-	BUCKET_BAG_UPDATE = self:RegisterBucketEvent("BAG_UPDATE", 1)
+	-- events that may fire multiple times in quick succession and require a cache update, but don't require information from the event
+	BUCKET_BAG_UPDATE = self:RegisterBucketEvent("BAG_UPDATE", 1, "UpdateBags")
+	BUCKET_PLAYER_LEVEL_UP = self:RegisterBucketEvent("PLAYER_LEVEL_UP", 1, "ClearItemCache")
+	-- events that only fire occassionally
 	self:RegisterEvent("MERCHANT_SHOW")
 	self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
+	self:RegisterEvent("ASCENSION_STORE_COLLECTION_ITEM_LEARNED")
+	self:RegisterEvent("AUCTION_HOUSE_CLOSED")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	-- events that require the event details and also fire a BAG_UPDATE
+	C_Hook:Register(self, "BAG_ITEM_REMOVED, BAG_ITEM_COUNT_CHANGED, BAG_ITEM_REPLACED")
 
 	-- self:SecureHook("OpenAllBags", BAG_OPEN)
 	-- self:SecureHook("OpenBackpack", BAG_OPEN)
@@ -432,9 +441,17 @@ function PastLoot:OnEnable()
 end
 
 function PastLoot:OnDisable()
+	-- events that may fire multiple times in quick succession and require a cache update, but don't require information from the event
 	self:UnregisterBucket(BUCKET_BAG_UPDATE)
+	self:UnregisterBucket(BUCKET_PLAYER_LEVEL_UP)
+	-- events that only fire occassionally
 	self:UnregisterEvent("MERCHANT_SHOW")
 	self:UnregisterEvent("EQUIPMENT_SETS_CHANGED")
+	self:UnregisterEvent("ASCENSION_STORE_COLLECTION_ITEM_LEARNED")
+	self:UnregisterEvent("AUCTION_HOUSE_CLOSED")
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	-- events that require the event details and also fire a BAG_UPDATE
+	C_Hook:Unregister(self, "BAG_ITEM_REMOVED, BAG_ITEM_COUNT_CHANGED, BAG_ITEM_REPLACED")
 end
 
 function PastLoot:OnProfileChanged()
@@ -480,16 +497,130 @@ local RollMethodLookup = {
 	[3] = L["Destroy"],
 }
 
-function PastLoot:EQUIPMENT_SETS_CHANGED(Event, ...)
-	if Event ~= "EQUIPMENT_SETS_CHANGED" then return end
-	update_sets()
+local QueueOperations = {
+	["reset"] = false,
+	["GUIDs"] = {}, -- Each GUID recalculates EvaluateItem
+	--	["BagSlots_Count"] = { [0] = {}, [1] = {}, [2] = {}, [3] = {}, [4] = {} }, -- bag, slot pairs to update with the item there.
+	--	["BagSlots_Location"] = { [0] = {}, [1] = {}, [2] = {}, [3] = {}, [4] = {} }, -- bag, slot pairs to update with the item there.
+	["IDs"] = {}, -- set of IDs to invalidate matching caches
+}
+
+local function shallow_copy(t)
+	local t2 = {}
+	for k, v in pairs(t) do
+		t2[k] = v
+	end
+	return t2
 end
 
-function PastLoot:BAG_UPDATE(Event, Bag, ...)
-	if Event ~= "BAG_UPDATE" or Bag == nil or Bag < 0 or Bag > 4 then return end
-	-- throttle bag updates
-	-- PastLoot:UpdateInventoryCache()
-	--  print("Bag update")
+-- Bucket Event to handle updating the item cache
+function PastLoot:UpdateBags(...)
+	local currentTime = GetTime()
+	print("Updating bags: " .. currentTime)
+	XanPrint(QueueOperations, 3)
+	if QueueOperations["reset"] then
+		print("Deleting Cache")
+		PastLoot.EvalCache = {}
+	else
+		for k, _ in pairs(QueueOperations["GUIDs"]) do
+			if PastLoot.EvalCache[k] then
+				print("Updating GUID Eval")
+				local result, match = PastLoot:EvaluateItem(PastLoot.EvalCache[k]["itemObj"])
+				PastLoot.EvalCache[k]["result"] = result or 1
+				PastLoot.EvalCache[k]["match"] = match or -1
+				PastLoot.EvalCache[k]["lastUpdate"] = currentTime
+			end
+		end
+		if #QueueOperations["IDs"] > 0 then
+			print("*1**")
+			XanPrint(QueueOperations["IDs"])
+			print("~~~")
+			for k, v in pairs(PastLoot.EvalCache) do
+				if QueueOperations["IDs"][v["itemObj"].id] or v["lastUpdate"] + 900 < currentTime then -- TODO: rewrite with config time
+					print("Forgetting ID")
+					PastLoot.EvalCache[k] = nil
+				end
+			end
+		end
+	end
+	QueueOperations = { ["reset"] = false, ["GUIDs"] = {}, ["IDs"] = {} }
+	for bag = 0, 4 do
+		for slot = 1, GetContainerNumSlots(bag) do
+			local guid = GetContainerItemGUID(bag, slot)
+			if guid and not PastLoot.EvalCache[guid] then
+				local itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
+				local result, match = PastLoot:EvaluateItem(itemObj)
+				PastLoot.EvalCache[guid] = {
+					["itemObj"] = itemObj,
+					["result"] = result or 1,
+					["match"] = match or -1,
+					["lastUpdate"] = currentTime
+				}
+			end
+		end
+	end
+end
+
+function PastLoot:ClearItemCache(...)
+	QueueOperations["reset"] = true
+end
+
+function PastLoot:AUCTION_HOUSE_CLOSED(Event, ...)
+	QueueOperations["reset"] = true
+end
+
+function PastLoot:PLAYER_ENTERING_WORLD(Event, ...)
+	QueueOperations["reset"] = true
+end
+
+function PastLoot:ASCENSION_STORE_COLLECTION_ITEM_LEARNED(Event, ID, ...)
+	QueueOperations["IDs"][ID] = true
+	print("*2**")
+	XanPrint(QueueOperations, 3)
+	print("~~~")
+end
+
+function PastLoot:BAG_ITEM_REMOVED(Event, Bag, Slot, ID, StackCount, ...)
+	print(Event, Bag, Slot, ID, StackCount, ...)
+	QueueOperations["IDs"][ID] = true
+	print("*3**")
+	XanPrint(QueueOperations, 3)
+	print("~~~")
+end
+
+function PastLoot:BAG_ITEM_COUNT_CHANGED(Event, Bag, Slot, ID, NewStackNum, Change, ...)
+	QueueOperations["IDs"][ID] = true
+	print("*4**")
+	XanPrint(QueueOperations, 3)
+	print("~~~")
+	--	QueueOperations["BagSlots_Count"][Bag][Slot] = NewStackNum
+end
+
+function PastLoot:BAG_ITEM_REPLACED(Event, Bag, Slot, OldID, OldCount, NewID, NewCount, ...)
+	QueueOperations["IDs"][OldID] = true
+	QueueOperations["IDs"][NewID] = true
+	print("*5**")
+	XanPrint(QueueOperations, 3)
+	print("~~~")
+	--	QueueOperations["BagSlots_Location"][Bag][Slot] = true
+end
+
+function PastLoot:EQUIPMENT_SETS_CHANGED(Event, ...)
+	if Event ~= "EQUIPMENT_SETS_CHANGED" then return end
+	local oldsets = shallow_copy(PastLoot.setGUIDs)
+	update_sets()
+	-- check the old and new lists for differences
+	for k, _ in pairs(PastLoot.setGUIDs) do
+		if not oldsets[k] then
+			QueueOperations["GUIDs"][k] = true
+		end
+	end
+	for k, _ in pairs(oldsets) do
+		if not PastLoot.setGUIDs[k] then
+			QueueOperations["GUIDs"][k] = true
+		end
+	end
+	XanPrint(QueueOperations, 3)
 end
 
 function PastLoot:MERCHANT_SHOW(Event, ...)
@@ -498,9 +629,16 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 	local amount = 0
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
-			local itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
+			local itemObj, result
+			local guid = GetContainerItemGUID(bag, slot)
+			if PastLoot.EvalCache[guid] then
+				itemObj = PastLoot.EvalCache[guid]["itemObj"]
+				result = { PastLoot.EvalCache[guid]["result"], PastLoot.EvalCache[guid]["match"] }
+			else
+				itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
+			end
 			if itemObj and itemObj.vendorPrice and itemObj.vendorPrice > 0 then
-				local result = PastLoot:EvaluateItem(itemObj)
+				result = result or PastLoot:EvaluateItem(itemObj)
 				if result == 2 or result == 3 then
 					amount = amount + itemObj.count * itemObj.vendorPrice
 					if sold and strlen(sold) + strlen(itemObj.link) > 255 then
