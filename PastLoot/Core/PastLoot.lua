@@ -574,7 +574,7 @@ local validationQue = {}
 local deleteTimer
 local function deleteValidation()
 	while #validationQue > 0 do
-		local entry = Table.remove(validationQue)
+		local entry = table.remove(validationQue)
 		if not GetContainerItemGUID(entry.bag,entry.slot) then
 			PastLoot:Pour(entry.msg)
 		end
@@ -664,7 +664,7 @@ function PastLoot:UpdateBags(...)
 			validationEntry.bag = citem.bag
 			validationEntry.slot = citem.slot
 			validationEntry.msg = StatusMsg
-			Table.insert(validationQue, validationEntry)
+			table.insert(validationQue, validationEntry)
 			deleteTimer = C_Timer.NewTimer(.5, deleteValidation)
 			todelete = todelete - 1
 		end
