@@ -611,7 +611,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 			local guid = GetContainerItemGUID(bag, slot)
 			if PastLoot.EvalCache[guid] then
 				itemObj = PastLoot.EvalCache[guid]["itemObj"]
-				result = { PastLoot.EvalCache[guid]["result"], PastLoot.EvalCache[guid]["match"] }
+				result = PastLoot.EvalCache[guid]["result"]
 			else
 				itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
 			end
