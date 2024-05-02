@@ -2,7 +2,7 @@
 
 function PastLoot:ResetCache()
 	PastLoot.EvalCache = {}
-	PastLoot.TooltipCache = {tt="",Left={},Right={}}
+	PastLoot.TooltipCache = { tt = "", Left = {}, Right = {} }
 end
 
 local function initCache()
@@ -45,8 +45,8 @@ function PastLoot:BuildTooltipCache(item)
 	PastLootTT:SetHyperlink(item.link)
 	local ttName = PastLootTT:GetName()
 	for Index = 1, PastLootTT:NumLines() do
-		cache.Left[Index]  = getLine( _G[ttName .. "TextLeft"  .. Index] )
-		cache.Right[Index] = getLine( _G[ttName .. "TextRight" .. Index] )
+		cache.Left[Index]  = getLine(_G[ttName .. "TextLeft" .. Index])
+		cache.Right[Index] = getLine(_G[ttName .. "TextRight" .. Index])
 	end
 end
 
@@ -54,13 +54,18 @@ function PastLoot:GetItemEvaluation(item)
 	initCache()
 	if not item or not item.guid then return end
 	local cache = PastLoot.EvalCache
-	local result
-	if cache[item.guid] and cache[item.guid]["lastUpdate"] + 900 >= GetTime() then
-		result = {cache[item.guid]["result"], cache[item.guid]["match"]}
-	else -- not cache[item.guid]
-		local r, m = PastLoot:EvaluateItem(item)
-		result = {r, m}
-		cache[item.guid] = {["itemObj"] = item, ["result"] = r, ["match"] = m, ["lastUpdate"] = GetTime()}
+	if not (cache[item.guid] and cache[item.guid]["expiresAt"] >= GetTime()) then
+		if PastLoot:ValidateItemObj(item) then
+			local r, m = PastLoot:EvaluateItem(item)
+			cache[item.guid] = { ["itemObj"] = item, ["result"] = r, ["match"] = m, ["expiresAt"] = GetTime() +
+			self.db.profile.CacheExpires }
+		else
+			cache[item.guid] = { ["itemObj"] = item, ["result"] = 1, ["match"] = -1, ["expiresAt"] = GetTime() + 5 }
+		end
 	end
-	return result
+	return { cache[item.guid]["result"], cache[item.guid]["match"] }
+end
+
+function PastLoot:ValidateItemObj(itemObj)
+	return itemObj.name and itemObj.count and itemObj.id and itemObj.guid
 end

@@ -21,6 +21,7 @@ local defaults = {
 		["KeepOpen"] = 5,
 		["DeleteVendor"] = false,
 		["ShowDelete"] = true,
+		["CacheExpires"] = 900,
 		["MessageText"] = {
 			["keep"] = L["keeping %item% (%rule%)"],
 			["vendor"] = L["vendoring %item% (%rule%)"],
@@ -479,7 +480,7 @@ function PastLoot:OnEnable()
 	self:RegisterEvent("ASCENSION_STORE_COLLECTION_ITEM_LEARNED")
 	self:RegisterEvent("AUCTION_HOUSE_CLOSED")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	-- events that require the event details and also fire a BAG_UPDATE
+	-- events that require the event details and also fire with BAG_UPDATE
 	C_Hook:Register(self, "BAG_ITEM_REMOVED, BAG_ITEM_COUNT_CHANGED, BAG_ITEM_REPLACED")
 
 	-- self:SecureHook("OpenAllBags", BAG_OPEN)
@@ -584,13 +585,13 @@ function PastLoot:UpdateBags(...)
 				local result, match = PastLoot:EvaluateItem(PastLoot.EvalCache[k]["itemObj"])
 				PastLoot.EvalCache[k]["result"] = result or 1
 				PastLoot.EvalCache[k]["match"] = match or -1
-				PastLoot.EvalCache[k]["lastUpdate"] = currentTime
+				PastLoot.EvalCache[k]["expiresAt"] = currentTime + self.db.profile.CacheExpires
 			end
 		end
 		-- forget items based on item id
 		if type(next(QueueOperations["IDs"])) ~= "nil" then
 			for k, v in pairs(PastLoot.EvalCache) do
-				if QueueOperations["IDs"][v["itemObj"].id] or v["lastUpdate"] + 900 < currentTime then -- TODO: rewrite with config time
+				if QueueOperations["IDs"][v["itemObj"].id] then
 					PastLoot.EvalCache[k] = nil
 				end
 			end
@@ -598,19 +599,13 @@ function PastLoot:UpdateBags(...)
 	end
 	-- we processed the update, reset the queue
 	QueueOperations = { ["reset"] = false, ["GUIDs"] = {}, ["IDs"] = {} }
-	-- cache any uncached items in bag
+	-- cache any expired or uncached items in bag
 	for bag = 0, 4 do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local guid = GetContainerItemGUID(bag, slot)
-			if guid and not PastLoot.EvalCache[guid] then
+			if guid and (not PastLoot.EvalCache[guid] or PastLoot.EvalCache[guid]["expiresAt"] < currentTime) then
 				local itemObj = PastLoot:FillContainerItemInfo(nil, bag, slot)
-				local result, match = PastLoot:EvaluateItem(itemObj)
-				PastLoot.EvalCache[guid] = {
-					["itemObj"] = itemObj,
-					["result"] = result or 1,
-					["match"] = match or -1,
-					["lastUpdate"] = currentTime
-				}
+				PastLoot:GetItemEvaluation(itemObj)
 			end
 		end
 	end
