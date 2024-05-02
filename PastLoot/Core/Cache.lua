@@ -19,10 +19,10 @@ local function ColorCheck(Red, Green, Blue, Alpha)
 	return (Red == 255 and Green == 32 and Blue == 32 and Alpha == 255)
 end
 
-local function getLine(line)
-	if line then
-		local text = line:GetText()
-		local Red, Green, Blue, Alpha = line:GetTextColor()
+local function getLine(Line)
+	if Line then
+		local text = Line:GetText()
+		local Red, Green, Blue, Alpha = Line:GetTextColor()
 		if ColorCheck(Red, Green, Blue, Alpha) then
 			PastLoot.TooltipCache.usable = false
 		end
