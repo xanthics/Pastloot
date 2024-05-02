@@ -629,6 +629,10 @@ function PastLoot:UpdateBags(...)
 			else
 				value = data["itemObj"].stackValue
 			end
+			-- so we don't immediately delete summoned items that are tagged vendor and instead only to free space
+			if value == 0 and data["result"] == 2 then
+				value = 1
+			end
 			deletecache[#deletecache + 1] = {
 				["guid"] = guid,
 				["value"] = value,
