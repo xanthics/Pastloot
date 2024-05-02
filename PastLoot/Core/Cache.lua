@@ -1,11 +1,13 @@
 ﻿local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 
+function PastLoot:ResetCache()
+	PastLoot.EvalCache = {}
+	PastLoot.TooltipCache = {tt="",Left={},Right={}}
+end
+
 local function initCache()
-	if not PastLoot.EvalCache then
-		PastLoot.EvalCache = {}
-	end
-	if not PastLoot.TooltipCache then
-		PastLoot.TooltipCache = {tt="",Left={},Right={}}
+	if not PastLoot.EvalCache or not PastLoot.TooltipCache then
+		PastLoot:ResetCache()
 	end
 end
 
