@@ -22,7 +22,7 @@ end
 local function getLine(line)
 	if line then
 		local text = line:GetText()
-		local Red, Green, Blue, Alpha = Line:GetTextColor()
+		local Red, Green, Blue, Alpha = line:GetTextColor()
 		if ColorCheck(Red, Green, Blue, Alpha) then
 			PastLoot.TooltipCache.usable = false
 		end
