@@ -133,6 +133,9 @@ end
 
 function module.Widget:GetFilterText(Index)
 	local Value = self:GetData()
+	if tonumber(Value[Index][1]) then
+		return Value[Index][1] .. " - " .. C_Item.GetColoredItemName(Value[Index][1])
+	end
 	return Value[Index][1]
 end
 
