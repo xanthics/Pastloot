@@ -6,6 +6,7 @@ L["Active Filters_Desc"] = [=[Select a filter to modify, or shift-right-click to
 L["Add"] = true
 L["Add a new rule."] = true
 L["Add this filter."] = true
+L["AH Price"] = true
 L["Allow Multiple Confirm Popups"] = true
 L["Available Filters"] = true
 L["Available Filters_Desc"] = [=[Select a filter to use.
@@ -195,6 +196,7 @@ L["Selected rule will only match items with this type and subtype."] = true
 L["Selected rule will only match these items."] = true
 L["Selected rule will only match this quality of items."] = true
 L["Selected rule will only match usable items."] = true
+L["Selected rule will only match items when compared to Auction value."] = true
 L["Temp Item ID"] = true
 L["Temp Item Name"] = true
 L["Temp Name"] = true
