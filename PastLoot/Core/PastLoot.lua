@@ -476,8 +476,8 @@ function PastLoot:OnEnable()
 	self:RegisterEvent("MERCHANT_SHOW")
 	self:RegisterEvent("EQUIPMENT_SETS_CHANGED")
 	self:RegisterEvent("ASCENSION_STORE_COLLECTION_ITEM_LEARNED")
-	self:RegisterEvent("AUCTION_HOUSE_CLOSED")
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self:RegisterEvent("AUCTION_HOUSE_CLOSED", "ClearItemCache")
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "ClearItemCache")
 	-- events that require the event details and also fire with BAG_UPDATE
 	C_Hook:Register(self, "BAG_ITEM_REMOVED, BAG_ITEM_COUNT_CHANGED, BAG_ITEM_REPLACED")
 
@@ -665,21 +665,13 @@ function PastLoot:UpdateBags(...)
 			validationEntry.slot = citem.slot
 			validationEntry.msg = StatusMsg
 			table.insert(validationQue, validationEntry)
-			deleteTimer = C_Timer.NewTimer(.5, deleteValidation)
+			deleteTimer = Timer.NewTimer(.5, deleteValidation)
 			todelete = todelete - 1
 		end
 	end
 end
 
 function PastLoot:ClearItemCache(...)
-	QueueOperations["reset"] = true
-end
-
-function PastLoot:AUCTION_HOUSE_CLOSED(Event, ...)
-	QueueOperations["reset"] = true
-end
-
-function PastLoot:PLAYER_ENTERING_WORLD(Event, ...)
 	QueueOperations["reset"] = true
 end
 
