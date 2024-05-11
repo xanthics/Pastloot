@@ -109,7 +109,7 @@ end
 function module.Widget:SetMatch(itemObj, Tooltip)
 	local Line, Text, Red, Green, Blue, Alpha
 	local Usable = 2 -- Choices 2 is usable
-	PastLoot.BuildTooltipCache(itemObj)
+	PastLoot:BuildTooltipCache(itemObj)
 	local cache = PastLoot.TooltipCache
 
 	-- Found on line 3 of most items
@@ -117,7 +117,7 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 	-- Found on line 4 of heroic/colorblind mode items
 	-- Found on line 5 of heroic/colorblind that are unique items
 	-- Found on line 7 of bop, unique mounts with level requirement and riding requirements (reins of the bronze drake)
-	
+
 	module.CurrentMatch = cache.usable and 2 or 3
 	module:Debug("Usable: " .. Usable .. " (" .. module:GetUsableText(Usable) .. ")")
 end

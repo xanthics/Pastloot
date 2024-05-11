@@ -113,7 +113,7 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 	-- Found on line 4 for heroic and/or colorblind option bop items.
 	-- Scan till line 5 or until newline character detected (patterns have a newline, not sure if anything else does)
 	Unique = 2 -- module.Choices[2] = "Not"
-	PastLoot.BuildTooltipCache(itemObj)
+	PastLoot:BuildTooltipCache(itemObj)
 	local cache = PastLoot.TooltipCache
 	for Index = 1, math.min(5, #cache.Left) do
 		LineText = cache.Left[Index]

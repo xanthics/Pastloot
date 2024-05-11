@@ -138,7 +138,7 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 	-- Found on line 3 for Heroic / colorblind mode items
 	-- Scan till line 4 or until newline character detected (patterns have a newline, not sure if anything else does)
 	Bind = 2 -- module.Bind[2] = "None"
-	PastLoot.BuildTooltipCache(itemObj)
+	PastLoot:BuildTooltipCache(itemObj)
 	local cache = PastLoot.TooltipCache
 	for Index = 2, math.min(4, #cache.Left) do
 		LineText = cache.Left[Index]

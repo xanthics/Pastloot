@@ -109,7 +109,7 @@ end
 function module.Widget:SetMatch(itemObj, Tooltip)
 	local TextLine, Text
 	module.CurrentMatch = 3 -- module.Choices[2] = "Unlearned"
-	PastLoot.BuildTooltipCache(itemObj)
+	PastLoot:BuildTooltipCache(itemObj)
 	local cache = PastLoot.TooltipCache
 	-- Found on line 7 of Reins of the Bronze Drake
 	for Index = 2, #cache.Left do
