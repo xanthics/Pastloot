@@ -331,6 +331,9 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 		module.CurrentMatch = nil
 	end		
 	module.CurrentMatch = module.CurrentMatch or 0
+	if itemObj.count then
+		module.CurrentMatch = module.CurrentMatch * itemObj.count
+	end
 	module:Debug("Item AH Price: " .. module.CurrentMatch)
 end
 
