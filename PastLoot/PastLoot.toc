@@ -1,7 +1,7 @@
 ## Interface: 30300
 ## Title: PastLoot
-## Author: Xan.  PassLoot by Odlaw
-## Version: 0.5
+## Author: Xan, Bandit Tech.  Remix of PassLoot by Odlaw
+## Version: 1.0
 ## Notes: Keep, Vendor, Delete ruleslist for inventory management
 ## SavedVariables: PastLootDB
 ## OptionalDeps: Ace3, LibBabble-Inventory-3.0, LibSink-2.0, LibDataBroker-1.1
