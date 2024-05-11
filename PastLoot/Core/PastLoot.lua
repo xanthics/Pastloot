@@ -55,6 +55,10 @@ local function dupcheck(a, b)
 	return false
 end
 
+local function slash_feedback(flag, idx, command)
+	PastLoot:Pour("Completed: "..flag.." '"..command.."' to rule #"..idx.." '"..PastLoot.db.profile.Rules[idx].Desc.."'")
+end
+
 local function handleAddRemove(value, cmdname, dbkey, example)
 	local idx, flag, command = value:match("(%d-) (%S*) (.*)")
 	if command and idx and flag then
@@ -81,7 +85,7 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 				else
 					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, "Exact", false })
 				end
-				PastLoot:Pour("Operation: " .. flag .. ", rule " .. idx .. ", value '" .. command .. "' complete.")
+				slash_feedback(flag, idx, command)
 			else
 				PastLoot:Pour("Item already present in Rule, skipping.")
 			end
@@ -91,7 +95,7 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 				if v[1]:lower() == command then
 					found = true
 					table.remove(PastLoot.db.profile.Rules[idx][dbkey], i)
-					PastLoot:Pour("Operation: " .. flag .. ", rule " .. idx .. ", value '" .. command .. "' complete.")
+					slash_feedback(flag, idx, command)
 					break
 				end
 			end
