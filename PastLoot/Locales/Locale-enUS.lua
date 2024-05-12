@@ -237,3 +237,4 @@ L["DeleteVendor"] = "Delete Vendor Rule Items"
 L["DeleteVendorDesc"] = "In order to keep a certain number of slots available, allow the deletion of Vendor Rule items."
 L["ShowDelete"] = "Show When Deleting"
 L["ShowDeleteDesc"] = "Will print feedback any time an item is deleted."
+L["Destroyed"] = true

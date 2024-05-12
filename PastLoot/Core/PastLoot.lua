@@ -561,17 +561,19 @@ local function deleteValidation()
 	while #validationQue > 0 do
 		local entry = table.remove(validationQue)
 		if not GetContainerItemGUID(entry.bag, entry.slot) then
-			PastLoot:AddLastRoll(entry.guid)
+			PastLoot:AddLastRoll(entry.guid, true)
 			PastLoot:Pour(entry.msg)
 		end
 	end
 end
 
 --cache[item.guid] = { ["itemObj"] = item, ["result"] = 1, ["match"] = -1
-function PastLoot:AddLastRoll(guid)
+function PastLoot:AddLastRoll(guid, destroyed)
 	-- Add to LastRolls
 	local TextLine, Method
-	if (PastLoot.EvalCache[guid]["result"]) then
+	if destroyed then
+		Method = L["Destroyed"]
+	elseif (PastLoot.EvalCache[guid]["result"]) then
 		Method = RollMethodLookup[PastLoot.EvalCache[guid]["result"]]
 	else
 		Method = L["Ignored"]
@@ -664,6 +666,7 @@ function PastLoot:UpdateBags(...)
 			validationEntry.bag = citem.bag
 			validationEntry.slot = citem.slot
 			validationEntry.msg = StatusMsg
+			validationEntry.guid = citem.guid
 			table.insert(validationQue, validationEntry)
 			deleteTimer = Timer.NewTimer(.5, deleteValidation)
 			todelete = todelete - 1
