@@ -561,9 +561,27 @@ local function deleteValidation()
 	while #validationQue > 0 do
 		local entry = table.remove(validationQue)
 		if not GetContainerItemGUID(entry.bag, entry.slot) then
+			PastLoot:AddLastRoll(entry.guid)
 			PastLoot:Pour(entry.msg)
 		end
 	end
+end
+
+--cache[item.guid] = { ["itemObj"] = item, ["result"] = 1, ["match"] = -1
+function PastLoot:AddLastRoll(guid)
+	-- Add to LastRolls
+	local TextLine, Method
+	if (PastLoot.EvalCache[guid]["result"]) then
+		Method = RollMethodLookup[PastLoot.EvalCache[guid]["result"]]
+	else
+		Method = L["Ignored"]
+	end
+	TextLine = string.format("|T%s:0|t %s - %s -> %s", PastLoot.EvalCache[guid]["itemObj"].texture, PastLoot.EvalCache[guid]["itemObj"].link, Method,
+		PastLoot.db.profile.Rules[PastLoot.EvalCache[guid]["match"]].Desc)
+	if (#self.LastRolls == 10) then
+		table.remove(self.LastRolls, 1)
+	end
+	table.insert(self.LastRolls, TextLine)
 end
 
 -- Bucket Event to handle updating the item cache
@@ -733,6 +751,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 					else
 						sold = c .. itemObj.link
 					end
+					PastLoot:AddLastRoll(guid)
 					UseContainerItem(bag, slot)
 				end
 			end
