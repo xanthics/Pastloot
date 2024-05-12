@@ -592,7 +592,7 @@ function PastLoot:UpdateBags(...)
 	-- calculate free space and cache any expired or uncached items in bag
 	local freespace = 0
 	for bag = 0, 4 do
-		freespace = freespace + GetContainerNumFreeSlots(i)
+		freespace = freespace + GetContainerNumFreeSlots(bag)
 		for slot = 1, GetContainerNumSlots(bag) do
 			local guid = GetContainerItemGUID(bag, slot)
 			if guid and (not PastLoot.EvalCache[guid] or PastLoot.EvalCache[guid]["expiresAt"] < currentTime) then
