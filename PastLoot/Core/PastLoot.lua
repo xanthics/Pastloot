@@ -254,20 +254,6 @@ PastLoot.OptionsTable = {
 						},
 					},
 				},
-				["AllowMultipleConfirmPopups"] = {
-					["name"] = L["Allow Multiple Confirm Popups"],
-					["desc"] = L
-						["Checking this will disable the exclusive bit to allow multiple confirmation of loot roll popups"],
-					["type"] = "toggle",
-					["order"] = 20,
-					["arg"] = { "AllowMultipleConfirmPopups" },
-					["set"] = function(info, value)
-						PastLoot:OptionsSet(info, value)
-						PastLoot:SetExclusiveConfirmPopupBit()
-					end,
-					["width"] = "full",
-					["disabled"] = function(info, value) return not StaticPopupDialogs.CONFIRM_LOOT_ROLL end, -- Some versions of WoW (or addons that remove) don't have CONFIRM_LOOT_ROLL
-				},
 				["SkipRules"] = {
 					["name"] = L["Skip Rules"],
 					["desc"] = L["Skip rules that have disabled or unknown filters."],
@@ -394,20 +380,6 @@ function PastLoot:OptionsGet(Info)
 	return Table[Info.arg[#Info.arg]]
 end
 
-function PastLoot:SetExclusiveConfirmPopupBit()
-	if (StaticPopupDialogs and StaticPopupDialogs.CONFIRM_LOOT_ROLL) then -- Some versions of WoW (or addons that remove) don't have CONFIRM_LOOT_ROLL
-		if (self.db.profile.AllowMultipleConfirmPopups) then
-			StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive = nil
-			StaticPopupDialogs.CONFIRM_LOOT_ROLL.multiple = 1
-		else
-			if (not StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive) then -- Only modify this if we touched it.
-				StaticPopupDialogs.CONFIRM_LOOT_ROLL.exclusive = 1
-				StaticPopupDialogs.CONFIRM_LOOT_ROLL.multiple = nil
-			end
-		end
-	end
-end
-
 function PastLoot:OnInitialize()
 	-- Called when the addon is loaded
 	-- LibStub("AceConsole-3.0"):RegisterChatCommand(L["PASTLOOT_SLASH_COMMAND"], function() InterfaceOptionsFrame_OpenToCategory(L["PastLoot"]) end)
@@ -526,7 +498,6 @@ end
 
 function PastLoot:OnProfileChanged()
 	-- this is called every time your profile changes (after the change)
-	self:SetExclusiveConfirmPopupBit()
 	self.CurrentRule = 0
 	self.CurrentRuleUnknownVars = {}
 	self.CurrentOptionFilter = { nil, 0 } -- Frame, line #
@@ -537,6 +508,7 @@ function PastLoot:OnProfileChanged()
 	self:CheckRuleTables()
 	self:Rules_RuleList_OnScroll()
 	self:DisplayCurrentRule()
+	self:ResetCache()
 	-- self:OnProfileNewOrDelete()
 end
 
@@ -574,14 +546,6 @@ local QueueOperations = {
 	--	["BagSlots_Location"] = { [0] = {}, [1] = {}, [2] = {}, [3] = {}, [4] = {} }, -- bag, slot pairs to update with the item there.
 	["IDs"] = {}, -- set of IDs to invalidate matching caches
 }
-
-local function shallow_copy(t)
-	local t2 = {}
-	for k, v in pairs(t) do
-		t2[k] = v
-	end
-	return t2
-end
 
 local function sort_delete(a, b)
 	return a.value < b.value
@@ -625,8 +589,10 @@ function PastLoot:UpdateBags(...)
 	end
 	-- we processed the update, reset the queue
 	QueueOperations = { ["reset"] = false, ["GUIDs"] = {}, ["IDs"] = {} }
-	-- cache any expired or uncached items in bag
+	-- calculate free space and cache any expired or uncached items in bag
+	local freespace = 0
 	for bag = 0, 4 do
+		freespace = freespace + GetContainerNumFreeSlots(i)
 		for slot = 1, GetContainerNumSlots(bag) do
 			local guid = GetContainerItemGUID(bag, slot)
 			if guid and (not PastLoot.EvalCache[guid] or PastLoot.EvalCache[guid]["expiresAt"] < currentTime) then
@@ -634,11 +600,6 @@ function PastLoot:UpdateBags(...)
 				PastLoot:GetItemEvaluation(itemObj)
 			end
 		end
-	end
-	-- calculate free space
-	local freespace = 0
-	for i = 0, 4 do
-		freespace = freespace + GetContainerNumFreeSlots(i)
 	end
 	-- iterate cache, build a guid->value pool for potentially deletable items
 	local deletecache = {}
@@ -709,6 +670,14 @@ function PastLoot:BAG_ITEM_REPLACED(Bag, Slot, OldID, OldCount, NewID, NewCount,
 	QueueOperations["IDs"][OldID] = true
 	QueueOperations["IDs"][NewID] = true
 	--	QueueOperations["BagSlots_Location"][Bag][Slot] = true
+end
+
+local function shallow_copy(t)
+	local t2 = {}
+	for k, v in pairs(t) do
+		t2[k] = v
+	end
+	return t2
 end
 
 function PastLoot:EQUIPMENT_SETS_CHANGED(Event, ...)
@@ -786,8 +755,7 @@ function PastLoot:EvaluateItem(itemObj)
 		self:Debug("Checking rule " .. RuleKey .. " " .. RuleValue.Desc)
 		if (self.db.profile.SkipRules and self.SkipRules[RuleKey]) then
 			if (self.db.profile.SkipWarning) then
-				self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " ..
-					string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
+				self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " .. string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
 			end
 		else
 			MatchedRule = true
