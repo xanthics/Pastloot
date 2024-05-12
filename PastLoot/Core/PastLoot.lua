@@ -93,10 +93,14 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 			if not dupcheck(PastLoot.db.profile.Rules[idx][dbkey], command) then
 				if cmdname == "IDRule" then
 					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, false })
-					table.sort(PastLoot.db.profile.Rules[idx][dbkey]["ItemIDs"], compare_id)
+					if PastLoot.db.profile.Rules[idx][dbkey]["ItemIDs"] then
+						table.sort(PastLoot.db.profile.Rules[idx][dbkey]["ItemIDs"], compare_id)
+					end
 				else
 					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, "Exact", false })
-					table.sort(PastLoot.db.profile.Rules[idx][dbkey]["Items"], compare_name)
+					if PastLoot.db.profile.Rules[idx][dbkey]["Items"] then
+						table.sort(PastLoot.db.profile.Rules[idx][dbkey]["Items"], compare_name)
+					end
 				end
 				slash_feedback(flag, idx, command)
 			else
@@ -755,7 +759,8 @@ function PastLoot:EvaluateItem(itemObj)
 		self:Debug("Checking rule " .. RuleKey .. " " .. RuleValue.Desc)
 		if (self.db.profile.SkipRules and self.SkipRules[RuleKey]) then
 			if (self.db.profile.SkipWarning) then
-				self:Pour("|cff33ff99" .. L["PastLoot"] .. "|r: " .. string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
+				self:Pour("|cff33ff99" ..
+				L["PastLoot"] .. "|r: " .. string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
 			end
 		else
 			MatchedRule = true
