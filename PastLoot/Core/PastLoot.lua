@@ -1,4 +1,4 @@
-﻿local VERSION = "4.1 r135"
+﻿local VERSION = "1.0"
 PastLoot = LibStub("AceAddon-3.0"):NewAddon("PastLoot", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0", "AceHook-3.0",
 	"LibSink-2.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
@@ -56,7 +56,18 @@ local function dupcheck(a, b)
 end
 
 local function slash_feedback(flag, idx, command)
-	PastLoot:Pour("Completed: "..flag.." '"..command.."' to rule #"..idx.." '"..PastLoot.db.profile.Rules[idx].Desc.."'")
+	PastLoot:Pour("Completed: " ..
+		flag .. " '" .. command .. "' to rule #" .. idx .. " '" .. PastLoot.db.profile.Rules[idx].Desc .. "'")
+end
+
+local function compare_name(a, b)
+	local atest = a[1]:lower()
+	local btext = b[1]:lower()
+	return (atest < btext) or (atest == btext and a[2] < b[2])
+end
+
+local function compare_id(a, b)
+	return a[1]:lower() < b[1]:lower()
 end
 
 local function handleAddRemove(value, cmdname, dbkey, example)
@@ -82,8 +93,10 @@ local function handleAddRemove(value, cmdname, dbkey, example)
 			if not dupcheck(PastLoot.db.profile.Rules[idx][dbkey], command) then
 				if cmdname == "IDRule" then
 					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, false })
+					table.sort(PastLoot.db.profile.Rules[idx][dbkey]["ItemIDs"], compare_id)
 				else
 					table.insert(PastLoot.db.profile.Rules[idx][dbkey], { command, "Exact", false })
+					table.sort(PastLoot.db.profile.Rules[idx][dbkey]["Items"], compare_name)
 				end
 				slash_feedback(flag, idx, command)
 			else
@@ -579,7 +592,7 @@ local deleteTimer
 local function deleteValidation()
 	while #validationQue > 0 do
 		local entry = table.remove(validationQue)
-		if not GetContainerItemGUID(entry.bag,entry.slot) then
+		if not GetContainerItemGUID(entry.bag, entry.slot) then
 			PastLoot:Pour(entry.msg)
 		end
 	end
