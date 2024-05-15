@@ -3,6 +3,7 @@
 	<Script file="AHPrice.lua"/>
 	<Script file="Bind.lua"/>
 	<Script file="Equipslot.lua"/>
+	<Script file="ExceptionalItem.lua"/>
 	<Script file="Inventory.lua"/>
 	<Script file="ItemID.lua"/>
 	<Script file="ItemInSet.lua"/>

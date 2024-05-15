@@ -174,6 +174,12 @@ L["PlayerLevel_DropDownTooltipDesc"] = true
 L["Mythic Plus Level"] = true
 L["MythicPlusLevel_DropDownTooltipDesc"] = [=[Selected rule will only match items that have a mythic plus level compared to this value.
 0 means the item is not a Mythic Plus item]=]
+L["Exceptional Item"] = true
+L["Selected module checks if an item is no longer normal."] = true
+L["Bloodforged"] = true
+L["Heroic"] = true
+L["Mythic"] = true
+L["Ascended"] = true
 L["Quality"] = true
 L["Raid"] = true
 L["Required Level"] = true
