@@ -171,6 +171,9 @@ L["Pickup"] = true
 L["Player Name"] = true
 L["Player Level"] = true
 L["PlayerLevel_DropDownTooltipDesc"] = true
+L["Mythic Plus Level"] = true
+L["MythicPlusLevel_DropDownTooltipDesc"] = [=[Selected rule will only match items that have a mythic plus level compared to this value.
+0 means the item is not a Mythic Plus item]=]
 L["Quality"] = true
 L["Raid"] = true
 L["Required Level"] = true
