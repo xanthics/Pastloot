@@ -135,7 +135,6 @@ end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
 	module.CurrentMatch = itemObj.mythicLevel
-	XanPrint(itemObj,2)
 	module:Debug("Required MythicItemLevel: " .. (module.CurrentMatch))
 end
 
@@ -143,7 +142,7 @@ function module.Widget:GetMatch(RuleNum, Index)
 	local Value = self:GetData(RuleNum)
 	local LogicalOperator = Value[Index][1]
 	local Comparison = self:Evaluate(Value[Index][2])
-	if (not Comparison) then
+	if (not Comparison) or module.CurrentMatch == 0 then -- 0 means the item is not from mythic plus
 		return false
 	end
 	if (LogicalOperator > 1) then
