@@ -109,7 +109,7 @@ end
 
 function PastLoot:UpdateInventoryCache()
 	PastLoot.InventoryCache = {}
-	for bag = 0, 4 do
+	for _, bag in ipairs(PastLoot.bags) do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local item = PastLoot:FillContainerItemInfo(nil, bag, slot)
 			if item and item.link then

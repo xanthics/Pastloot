@@ -160,7 +160,7 @@ PastLoot.OptionsTable = {
 			["type"] = "input",
 			["get"] = function() end,
 			["set"] = function(info)
-				for bag = 0, 4 do
+				for _, bag in ipairs(PastLoot.bags) do
 					for slot = 1, GetContainerNumSlots(bag) do
 						PastLoot.TestLink = PastLoot:FillContainerItemInfo(nil, bag, slot)
 						if (PastLoot.TestLink) then
@@ -615,7 +615,7 @@ function PastLoot:UpdateBags(...)
 	QueueOperations = { ["reset"] = false, ["GUIDs"] = {}, ["IDs"] = {} }
 	-- calculate free space and cache any expired or uncached items in bag
 	local freespace = 0
-	for bag = 0, 4 do
+	for _, bag in ipairs(PastLoot.bags) do
 		freespace = freespace + GetContainerNumFreeSlots(bag)
 		for slot = 1, GetContainerNumSlots(bag) do
 			local guid = GetContainerItemGUID(bag, slot)
@@ -727,7 +727,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 	PastLoot:UpdateBags() -- clear out any pending operations
 	local _, sold
 	local amount = 0
-	for bag = 0, 4 do
+	for _, bag in ipairs(PastLoot.bags) do
 		for slot = 1, GetContainerNumSlots(bag) do
 			local itemObj
 			local guid = GetContainerItemGUID(bag, slot)

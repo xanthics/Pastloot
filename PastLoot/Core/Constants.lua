@@ -24,6 +24,8 @@ PastLoot.RollOrderToIndex = {}
 for Key, Value in pairs(PastLoot.RollOrder) do
 	PastLoot.RollOrderToIndex[Value] = Key
 end
+--PastLoot.bags = {-2, 0, 1, 2, 3, 4} -- keyring, backpack, bags 1-4
+PastLoot.bags = {0, 1, 2, 3, 4} -- keyring doesn't return GUID yet(?)
 -- PastLoot.RollMsg = {
 	-- ["keep"] = L["keeping %item% (%rule%)"],
 	-- ["vendor"] = L["vendoring %item% (%rule%)"],
