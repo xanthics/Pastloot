@@ -738,7 +738,9 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 			end
 			if itemObj and itemObj.vendorPrice and itemObj.vendorPrice > 0 then
 				local result = PastLoot:GetItemEvaluation(itemObj)
-				if result[1] == 2 or result[1] == 3 then
+				if not result then
+					PastLoot:Debug("Invalid Result: slot( "..bag..","..slot..") " .. itemObj.link)
+				elseif result[1] == 2 or result[1] == 3 then
 					amount = amount + itemObj.count * itemObj.vendorPrice
 					if sold and strlen(sold) + strlen(itemObj.link) > 255 then
 						PastLoot:Pour("Sold: " .. sold)
