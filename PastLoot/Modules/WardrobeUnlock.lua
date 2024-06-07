@@ -14,6 +14,13 @@ local module_tooltip = L["Selected rule will only match unlearned Wardrobe items
 
 local module = PastLoot:NewModule(module_name)
 
+-- item types that will show they have a wardrobe unlock but cannot be unlocked
+local BAD_WARDROBE_SUBTYPES = {
+	["Thrown"] = true,
+	["Fishing Poles"] = true,
+	["Miscellaneous"] = true,
+}
+
 module.Choices = { {
 	["Name"] = L["Any"],
 	["Value"] = 1,
@@ -23,9 +30,6 @@ module.Choices = { {
 }, {
 	["Name"] = L["Unknown"],
 	["Value"] = 3,
-}, {
-	["Name"] = L["Unlocked from Different Item"],
-	["Value"] = 4,
 } }
 
 module.ConfigOptions_RuleDefaults = {
@@ -105,19 +109,28 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	local Owned = 0                   -- 0 means no Wardrobe line on tooltip
-	if itemObj.subclass ~= "Thrown" then -- you can't get wardrobe unlocks from thrown weapons
-		if APPEARANCE_ITEM_INFO[itemObj.id] then
+	local Owned = 0                                                                  -- 0 means no Wardrobe line on tooltip
+	if not (BAD_WARDROBE_SUBTYPES[itemObj.subclass] and itemObj.class == "Weapon") then -- you can't get wardrobe unlocks from some items
+		if C_Appearance then
+			local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
+			if appearanceID then
+				local isCollected = C_AppearanceCollection.IsAppearanceCollected(appearanceID)
+				if isCollected then -- unlocked
+					Owned = 2
+				else    -- unknown
+					Owned = 3
+				end
+			end
+		elseif APPEARANCE_ITEM_INFO[itemObj.id] then
 			local collectedID = APPEARANCE_ITEM_INFO[itemObj.id]:GetCollectedID()
-			if collectedID == itemObj.id then -- unlocked
+			if collectedID then -- unlocked
 				Owned = 2
-			elseif collectedID then  -- unlocked but from different item
-				Owned = 4
 			else                     -- unknown
 				Owned = 3
 			end
 		end
 	end
+
 	module.CurrentMatch = Owned
 	module:Debug("Wardrobe: " .. Owned .. " (" .. itemObj.id .. ")")
 end
