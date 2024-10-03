@@ -307,7 +307,7 @@ function PastLoot:Rules_RuleList_OnScroll()
 	for Line = 1, self.NumRuleListLines do
 		LineNum = Line + FauxScrollFrame_GetOffset(Frame.ScrollFrame)
 		if (LineNum <= NumRules) then
-			Frame["ScrollLine" .. Line].Text:SetText(self.db.profile.Rules[LineNum].Desc)
+			Frame["ScrollLine" .. Line].Text:SetText(LineNum .. ") " .. self.db.profile.Rules[LineNum].Desc)
 			Frame["ScrollLine" .. Line].Vendor:SetChecked(false)
 			Frame["ScrollLine" .. Line].Keep:SetChecked(false)
 			Frame["ScrollLine" .. Line].Destroy:SetChecked(false)
@@ -576,7 +576,7 @@ end
 
 function PastLoot:CopyCurrentRuleToProfile(profile)
 	local self =
-	PastLoot           -- as I will be using this from PastLoot.CopyCurrentRuleToProfile and the first arg will be the frame
+		PastLoot -- as I will be using this from PastLoot.CopyCurrentRuleToProfile and the first arg will be the frame
 	if (self.CurrentRule > 0) then
 		if (not self.db.profiles[profile] or not self.db.profiles[profile].Rules) then
 			self:Print(L["Unable to copy rule"])
@@ -656,8 +656,10 @@ function PastLoot:Create_RuleListScrollLine()
 	Frame.Keep:SetPoint("TOPLEFT", Frame.Text, "TOPRIGHT")
 	Frame.Keep:SetScript("OnClick", function(frame, button) self:SetLootMethod(Frame.LineNum, "keep") end)
 	Frame.Keep:SetScript("OnEnter",
-		function() self:ShowTooltip(L["Keep"], L["Will roll need on all loot matching this rule."],
-				L["Rolling is tried from left to right"]) end)
+		function()
+			self:ShowTooltip(L["Keep"], L["Will roll need on all loot matching this rule."],
+				L["Rolling is tried from left to right"])
+		end)
 	Frame.Keep.Text:SetText(L["Keep"])
 
 	Frame.Vendor = self:Create_CheckBox()
@@ -665,8 +667,10 @@ function PastLoot:Create_RuleListScrollLine()
 	Frame.Vendor:SetPoint("TOPLEFT", Frame.Keep, "TOPRIGHT", 40, 0)
 	Frame.Vendor:SetScript("OnClick", function(frame, button) self:SetLootMethod(Frame.LineNum, "vendor") end)
 	Frame.Vendor:SetScript("OnEnter",
-		function() self:ShowTooltip(L["Vendor"], L["Will roll greed on all loot matching this rule."],
-				L["Rolling is tried from left to right"]) end)
+	function()
+			self:ShowTooltip(L["Vendor"], L["Will roll greed on all loot matching this rule."],
+				L["Rolling is tried from left to right"])
+		end)
 	Frame.Vendor.Text:SetText(L["Vendor"])
 
 	Frame.Destroy = self:Create_CheckBox()
