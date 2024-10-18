@@ -144,11 +144,15 @@ PastLoot.OptionsTable = {
 			["get"] = function() end,
 			["set"] = function(info, value)
 				local _, link = GetItemInfo(value)
+				if not link then
+					_, link = GameTooltip:GetItem()
+				end
 				PastLoot.TestLink = PastLoot:InitItem(link)
 				if (PastLoot.TestLink) then
 					PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
 					PastLoot:EvaluateItem(PastLoot.TestLink)
 				else
+					PastLoot:Pour("|cff33ff99PastLoot|r: no valid item link or mouseover item found.")
 					PastLoot.TestLink = nil -- to make sure
 				end
 			end,
@@ -724,6 +728,7 @@ end
 
 function PastLoot:MERCHANT_SHOW(Event, ...)
 	if Event ~= "MERCHANT_SHOW" or "Fix-o-Tron 5000" == UnitName("target") then return end
+	self:ResetCache()
 	PastLoot:UpdateBags() -- clear out any pending operations
 	local _, sold
 	local amount = 0
