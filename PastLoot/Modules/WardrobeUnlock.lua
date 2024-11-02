@@ -109,25 +109,14 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	local Owned = 0                                                                  -- 0 means no Wardrobe line on tooltip
-	if not (BAD_WARDROBE_SUBTYPES[itemObj.subclass] and itemObj.class == "Weapon") then -- you can't get wardrobe unlocks from some items
-		if C_Appearance then
-			local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
-			if appearanceID then
-				local isCollected = C_AppearanceCollection.IsAppearanceCollected(appearanceID)
-				if isCollected then -- unlocked
-					Owned = 2
-				else    -- unknown
-					Owned = 3
-				end
-			end
-		elseif APPEARANCE_ITEM_INFO[itemObj.id] then
-			local collectedID = APPEARANCE_ITEM_INFO[itemObj.id]:GetCollectedID()
-			if collectedID then -- unlocked
-				Owned = 2
-			else                     -- unknown
-				Owned = 3
-			end
+	local Owned = 0 -- 0 means no Wardrobe line on tooltip
+	local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
+	if appearanceID then
+		local isCollected = C_AppearanceCollection.IsAppearanceCollected(appearanceID)
+		if isCollected then -- unlocked
+			Owned = 2
+		else            -- unknown
+			Owned = 3
 		end
 	end
 
