@@ -5,6 +5,27 @@ local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 -- local LDBIcon = LibStub("LibDBIcon-1.0")
 
+-- used to confirm deleting items
+StaticPopupDialogs["PASTLOOT_CONFIRM_ITEM_DELETE"] = {
+	text = "%s\nShould PastLoot delete all instances of this item?\nChoice lasts for the remainder of this session.",
+	button1 = "Yes",
+	button2 = "No",
+	OnAccept = function(self, clink)
+		PASTLOOT_CALL_BAG_UPDATE(clink, true)
+	end,
+	OnCancel = function(self, clink)
+		PASTLOOT_CALL_BAG_UPDATE(clink, false)
+	end,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
+}
+PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES = {}
+function PASTLOOT_CALL_BAG_UPDATE(clink, choice)
+	PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[clink] = choice
+	PastLoot:UpdateBags()
+end
+
 local defaults = {
 	["profile"] = {
 		["Quiet"] = false,
@@ -19,6 +40,13 @@ local defaults = {
 		["KeepOpen"] = 5,
 		["DeleteVendor"] = false,
 		["ShowDelete"] = true,
+		["DeleteCommon"] = false,
+		["DeleteUncommon"] = false,
+		["DeleteRare"] = false,
+		["DeleteEpic"] = false,
+		["DeleteLegendary"] = false,
+		["DeleteArtifact"] = false,
+		["DeleteVanity"] = false,
 		["CacheExpires"] = 900,
 		["MessageText"] = {
 			["keep"] = L["keeping %item% (%rule%)"],
@@ -144,11 +172,15 @@ PastLoot.OptionsTable = {
 			["get"] = function() end,
 			["set"] = function(info, value)
 				local _, link = GetItemInfo(value)
+				if not link then
+					_, link = GameTooltip:GetItem()
+				end
 				PastLoot.TestLink = PastLoot:InitItem(link)
 				if (PastLoot.TestLink) then
 					PastLoot.TestCanKeep, PastLoot.TestCanVendor, PastLoot.TestCanDestroy = true, true, true
 					PastLoot:EvaluateItem(PastLoot.TestLink)
 				else
+					PastLoot:Pour("|cff33ff99PastLoot|r: no valid item link or mouseover item found.")
 					PastLoot.TestLink = nil -- to make sure
 				end
 			end,
@@ -340,6 +372,64 @@ PastLoot.OptionsTable = {
 							["order"] = 40,
 							["arg"] = { "ShowDelete" },
 							["width"] = "full",
+						},
+						["ConfirmDelete"] = {
+							["name"] = L["Automatically Confirm Delete"], --L["Options"],
+							["order"] = 50,
+							["desc"] = L["Confirm Delete Desc"],
+							["type"] = "group",
+							["inline"] = true,
+							["args"] = {
+								["DeleteCommon"] = {
+									["name"] = ITEM_QUALITY_COLORS[1].hex .. ITEM_QUALITY1_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 10,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteCommon" },
+								},
+								["DeleteUncommon"] = {
+									["name"] = ITEM_QUALITY_COLORS[2].hex .. ITEM_QUALITY2_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 20,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteUncommon" },
+								},
+								["DeleteRare"] = {
+									["name"] = ITEM_QUALITY_COLORS[3].hex .. ITEM_QUALITY3_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 30,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteRare" },
+								},
+								["DeleteEpic"] = {
+									["name"] = ITEM_QUALITY_COLORS[4].hex .. ITEM_QUALITY4_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 40,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteEpic" },
+								},
+								["DeleteLegendary"] = {
+									["name"] = ITEM_QUALITY_COLORS[5].hex .. ITEM_QUALITY5_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 50,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteLegendary" },
+								},
+								["DeleteArtifact"] = {
+									["name"] = ITEM_QUALITY_COLORS[6].hex .. ITEM_QUALITY6_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 60,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteArtifact" },
+								},
+								["DeleteVanity"] = {
+									["name"] = ITEM_QUALITY_COLORS[7].hex .. ITEM_QUALITY7_DESC .. "|r", --L["Skip Warning"],
+									["type"] = "toggle",
+									["order"] = 70,
+									["desc"] = L["Confirm Delete Desc"],
+									["arg"] = { "DeleteVanity" },
+								},
+							},
 						},
 					},
 				},
@@ -586,6 +676,9 @@ function PastLoot:AddLastRoll(guid, destroyed)
 	table.insert(self.LastRolls, TextLine)
 end
 
+-- used to convert quality number to a word to determine if an item needs a delete confirmation
+local num_to_word = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact", "Vanity"}
+
 -- Bucket Event to handle updating the item cache
 function PastLoot:UpdateBags(...)
 	local currentTime = GetTime()
@@ -645,7 +738,8 @@ function PastLoot:UpdateBags(...)
 				["bag"] = data["itemObj"].bag,
 				["slot"] = data["itemObj"].slot,
 				["clink"] = data["itemObj"].link,
-				["rule"] = data["match"]
+				["rule"] = data["match"],
+				["rarity"] = data["itemObj"].quality
 			}
 		end
 	end
@@ -656,18 +750,26 @@ function PastLoot:UpdateBags(...)
 	while #deletecache > 0 and (todelete > 0 or deletecache[1].value == 0) do
 		local citem = table.remove(deletecache, 1)
 		if citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
-			PickupContainerItem(citem.bag, citem.slot)
-			DeleteCursorItem()
-			local StatusMsg = self.db.profile.MessageText.destroy
-			StatusMsg = string.gsub(StatusMsg, "%%item%%", citem.clink)
-			StatusMsg = string.gsub(StatusMsg, "%%rule%%", self.db.profile.Rules[citem.rule].Desc)
-			StatusMsg = "|cff33ff99" .. L["PastLoot"] .. "|r: " .. StatusMsg
-			local validationEntry = {}
-			validationEntry.bag = citem.bag
-			validationEntry.slot = citem.slot
-			validationEntry.msg = StatusMsg
-			validationEntry.guid = citem.guid
-			table.insert(validationQue, validationEntry)
+			if PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete"..num_to_word[citem.rarity]] then
+				PickupContainerItem(citem.bag, citem.slot)
+				DeleteCursorItem()
+				local StatusMsg = self.db.profile.MessageText.destroy
+				StatusMsg = string.gsub(StatusMsg, "%%item%%", citem.clink)
+				StatusMsg = string.gsub(StatusMsg, "%%rule%%", self.db.profile.Rules[citem.rule].Desc)
+				StatusMsg = "|cff33ff99" .. L["PastLoot"] .. "|r: " .. StatusMsg
+				local validationEntry = {}
+				validationEntry.bag = citem.bag
+				validationEntry.slot = citem.slot
+				validationEntry.msg = StatusMsg
+				validationEntry.guid = citem.guid
+				table.insert(validationQue, validationEntry)
+			elseif PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == nil then
+				local dialog = StaticPopup_Show("PASTLOOT_CONFIRM_ITEM_DELETE", citem.clink)
+				if dialog then
+					dialog.data = citem.clink
+				end
+				return
+			end
 			deleteTimer = Timer.NewTimer(.5, deleteValidation)
 			todelete = todelete - 1
 		end
@@ -724,6 +826,7 @@ end
 
 function PastLoot:MERCHANT_SHOW(Event, ...)
 	if Event ~= "MERCHANT_SHOW" or "Fix-o-Tron 5000" == UnitName("target") then return end
+	self:ResetCache()
 	PastLoot:UpdateBags() -- clear out any pending operations
 	local _, sold
 	local amount = 0
@@ -739,7 +842,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 			if itemObj and itemObj.vendorPrice and itemObj.vendorPrice > 0 then
 				local result = PastLoot:GetItemEvaluation(itemObj)
 				if not result then
-					PastLoot:Debug("Invalid Result: slot( "..bag..","..slot..") " .. itemObj.link)
+					PastLoot:Debug("Invalid Result: slot( " .. bag .. "," .. slot .. ") " .. itemObj.link)
 				elseif result[1] == 2 or result[1] == 3 then
 					amount = amount + itemObj.count * itemObj.vendorPrice
 					if sold and strlen(sold) + strlen(itemObj.link) > 255 then
@@ -784,7 +887,7 @@ function PastLoot:EvaluateItem(itemObj)
 		if (self.db.profile.SkipRules and self.SkipRules[RuleKey]) then
 			if (self.db.profile.SkipWarning) then
 				self:Pour("|cff33ff99" ..
-				L["PastLoot"] .. "|r: " .. string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
+					L["PastLoot"] .. "|r: " .. string.gsub(L["Skipping %rule%"], "%%rule%%", RuleValue.Desc))
 			end
 		else
 			MatchedRule = true
