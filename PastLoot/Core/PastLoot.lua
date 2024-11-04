@@ -750,7 +750,7 @@ function PastLoot:UpdateBags(...)
 	while #deletecache > 0 and (todelete > 0 or deletecache[1].value == 0) do
 		local citem = table.remove(deletecache, 1)
 		if citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
-			if PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete"..num_to_word[citem.rarity]] then
+			if citem.rarity == 0 or PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete"..num_to_word[citem.rarity]] then
 				PickupContainerItem(citem.bag, citem.slot)
 				DeleteCursorItem()
 				local StatusMsg = self.db.profile.MessageText.destroy
