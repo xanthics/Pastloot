@@ -14,13 +14,6 @@ local module_tooltip = L["Selected rule will only match unlearned Wardrobe items
 
 local module = PastLoot:NewModule(module_name)
 
--- item types that will show they have a wardrobe unlock but cannot be unlocked
-local BAD_WARDROBE_SUBTYPES = {
-	["Thrown"] = true,
-	["Fishing Poles"] = true,
-	["Miscellaneous"] = true,
-}
-
 module.Choices = { {
 	["Name"] = L["Any"],
 	["Value"] = 1,
