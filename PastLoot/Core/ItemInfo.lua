@@ -43,7 +43,7 @@ local function fillItemInfo(item)
 	return item
 end
 
-function PastLoot:FillContainerItemInfo(item,bag,slot)
+function PastLoot:FillContainerItemInfo(item, bag, slot)
 	local _, count, locked, _, readable, lootable, link = GetContainerItemInfo(bag, slot)
 	if item == nil and link ~= nil then item = self:InitItem(link) else return end
 
@@ -65,6 +65,6 @@ function PastLoot:InitItem(link)
 	item.link = link
 	item.id = GetItemInfoFromHyperlink(link)
 	item = fillItemInfo(item)
-	processItemFlavorText(item)
+	if item.equipSlot and item.equipSlot ~= "" then processItemFlavorText(item) end
 	return item
 end
