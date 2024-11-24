@@ -65,6 +65,12 @@ function PastLoot:InitItem(link)
 	item.link = link
 	item.id = GetItemInfoFromHyperlink(link)
 	item = fillItemInfo(item)
+	-- set some defaults since these are checked later if item flavor text isn't processed
+	item.isBloodforged = false
+	item.isHeroic = false
+	item.isMythic = false
+	item.isAscended = false
+	item.mythicLevel = 0 -- 0 means not a Mythic+ item
 	if item.equipSlot and item.equipSlot ~= "" then processItemFlavorText(item) end
 	return item
 end
