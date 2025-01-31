@@ -5,21 +5,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 -- local LDBIcon = LibStub("LibDBIcon-1.0")
 
--- used to confirm deleting items
-StaticPopupDialogs["PASTLOOT_CONFIRM_ITEM_DELETE"] = {
-	text = "%s\nShould PastLoot delete all instances of this item?\nChoice lasts for the remainder of this session.",
-	button1 = "Yes",
-	button2 = "No",
-	OnAccept = function(self, clink)
-		PASTLOOT_CALL_BAG_UPDATE(clink, true)
-	end,
-	OnCancel = function(self, clink)
-		PASTLOOT_CALL_BAG_UPDATE(clink, false)
-	end,
-	timeout = 0,
-	whileDead = true,
-	hideOnEscape = true,
-}
 PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES = {}
 function PASTLOOT_CALL_BAG_UPDATE(clink, choice)
 	PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[clink] = choice
@@ -529,6 +514,22 @@ function PastLoot:OnInitialize()
 	-- PanelTemplates_UpdateTabs(PastLoot_TabbedMenuContainer)
 	self.DropDownFrame = CreateFrame("Frame", "PastLoot_DropDownMenu", nil, "UIDropDownMenuTemplate")
 	PastLoot:ResetCache()
+
+	-- used to confirm deleting items
+	StaticPopupDialogs["PASTLOOT_CONFIRM_ITEM_DELETE"] = {
+		text = "%s\nShould PastLoot delete all instances of this item?\nChoice lasts for the remainder of this session.",
+		button1 = "Yes",
+		button2 = "No",
+		OnAccept = function(self, clink, ...)
+			PASTLOOT_CALL_BAG_UPDATE(clink, true)
+		end,
+		OnCancel = function(self, clink, reason)
+			if reason == "clicked" then PASTLOOT_CALL_BAG_UPDATE(clink, false) end
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+	}
 end
 
 local function update_sets()
@@ -646,7 +647,6 @@ local function sort_delete(a, b)
 end
 
 local validationQue = {}
-local deleteTimer
 local function deleteValidation()
 	while #validationQue > 0 do
 		local entry = table.remove(validationQue)
@@ -677,7 +677,7 @@ function PastLoot:AddLastRoll(guid, destroyed)
 end
 
 -- used to convert quality number to a word to determine if an item needs a delete confirmation
-local num_to_word = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact", "Vanity"}
+local num_to_word = { "Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact", "Vanity" }
 
 -- Bucket Event to handle updating the item cache
 function PastLoot:UpdateBags(...)
@@ -750,7 +750,7 @@ function PastLoot:UpdateBags(...)
 	while #deletecache > 0 and (todelete > 0 or deletecache[1].value == 0) do
 		local citem = table.remove(deletecache, 1)
 		if citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
-			if citem.rarity == 0 or PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete"..num_to_word[citem.rarity]] then
+			if citem.rarity == 0 or PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete" .. num_to_word[citem.rarity]] then
 				PickupContainerItem(citem.bag, citem.slot)
 				DeleteCursorItem()
 				local StatusMsg = self.db.profile.MessageText.destroy
@@ -763,6 +763,8 @@ function PastLoot:UpdateBags(...)
 				validationEntry.msg = StatusMsg
 				validationEntry.guid = citem.guid
 				table.insert(validationQue, validationEntry)
+				Timer.NewTimer(.5, deleteValidation)
+				todelete = todelete - 1
 			elseif PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == nil then
 				local dialog = StaticPopup_Show("PASTLOOT_CONFIRM_ITEM_DELETE", citem.clink)
 				if dialog then
@@ -770,8 +772,6 @@ function PastLoot:UpdateBags(...)
 				end
 				return
 			end
-			deleteTimer = Timer.NewTimer(.5, deleteValidation)
-			todelete = todelete - 1
 		end
 	end
 end
