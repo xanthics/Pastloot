@@ -5,6 +5,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("PastLoot")
 local LDB = LibStub:GetLibrary("LibDataBroker-1.1")
 -- local LDBIcon = LibStub("LibDBIcon-1.0")
 
+local PASTLOOT_POPUP = "PASTLOOT_CONFIRM_DELETE_YES_NO"
+
 PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES = {}
 function PASTLOOT_CALL_BAG_UPDATE(clink, choice)
 	PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[clink] = choice
@@ -516,7 +518,7 @@ function PastLoot:OnInitialize()
 	PastLoot:ResetCache()
 
 	-- used to confirm deleting items
-	StaticPopupDialogs["PASTLOOT_CONFIRM_ITEM_DELETE"] = {
+	StaticPopupDialogs[PASTLOOT_POPUP] = {
 		text = "%s\nShould PastLoot delete all instances of this item?\nChoice lasts for the remainder of this session.",
 		button1 = "Yes",
 		button2 = "No",
@@ -650,7 +652,7 @@ local validationQue = {}
 local function deleteValidation()
 	while #validationQue > 0 do
 		local entry = table.remove(validationQue)
-		if not GetContainerItemGUID(entry.bag, entry.slot) then
+		if entry.guid ~= "" then
 			PastLoot:AddLastRoll(entry.guid, true)
 			PastLoot:Pour(entry.msg)
 		end
@@ -749,7 +751,7 @@ function PastLoot:UpdateBags(...)
 	local todelete = self.db.profile.KeepOpen - freespace
 	while #deletecache > 0 and (todelete > 0 or deletecache[1].value == 0) do
 		local citem = table.remove(deletecache, 1)
-		if citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
+		if citem.guid ~= "" and citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
 			if citem.rarity == 0 or PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete" .. num_to_word[citem.rarity]] then
 				PickupContainerItem(citem.bag, citem.slot)
 				DeleteCursorItem()
@@ -765,8 +767,8 @@ function PastLoot:UpdateBags(...)
 				table.insert(validationQue, validationEntry)
 				Timer.NewTimer(.5, deleteValidation)
 				todelete = todelete - 1
-			elseif PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == nil then
-				local dialog = StaticPopup_Show("PASTLOOT_CONFIRM_ITEM_DELETE", citem.clink)
+			elseif not StaticPopup_Visible(PASTLOOT_POPUP) and PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == nil then
+				local dialog = StaticPopup_Show(PASTLOOT_POPUP, citem.clink)
 				if dialog then
 					dialog.data = citem.clink
 				end
