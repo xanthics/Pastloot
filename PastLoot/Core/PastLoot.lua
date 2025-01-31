@@ -772,7 +772,6 @@ function PastLoot:UpdateBags(...)
 				if dialog then
 					dialog.data = citem.clink
 				end
-				return
 			end
 		end
 	end
