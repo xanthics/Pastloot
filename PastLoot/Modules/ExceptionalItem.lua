@@ -32,6 +32,9 @@ module.Choices = { {
 }, {
 	["Name"] = L["Ascended"],
 	["Value"] = 6,
+}, {
+	["Name"] = L["Worldforged"],
+	["Value"] = 7,
 } }
 
 module.ConfigOptions_RuleDefaults = {
@@ -111,7 +114,7 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	module.CurrentMatch = { itemObj.isBloodforged, itemObj.isHeroic, itemObj.isMythic, itemObj.isAscended }
+	module.CurrentMatch = { itemObj.isBloodforged, itemObj.isHeroic, itemObj.isMythic, itemObj.isAscended, itemObj.isWorldforged }
 	module:Debug("Exceptionaltem: " .. "true" and itemObj.isBloodforged or "false"
 		.. "," .. "true" and itemObj.isHeroic or "false"
 		.. "," .. "true" and itemObj.isMythic or "false"
@@ -120,13 +123,14 @@ function module.Widget:SetMatch(itemObj, Tooltip)
 function module.Widget:GetMatch(RuleNum, Index)
 	local RuleValue = self:GetData(RuleNum)
 	local t_EI = module.CurrentMatch
-	local anyTrue = t_EI[1] or t_EI[2] or t_EI[3] or t_EI[4]
+	local anyTrue = t_EI[1] or t_EI[2] or t_EI[3] or t_EI[4] or t_EI[5]
 	if (RuleValue[Index][1] == 1 and not anyTrue) or -- rule is "None" and item is not exceptional
 		(RuleValue[Index][1] == 2 and anyTrue) or -- rule is "any" and the item is exceptional in some way
 		(RuleValue[Index][1] == 3 and t_EI[1]) or -- bloodforged
 		(RuleValue[Index][1] == 4 and t_EI[2]) or -- heroic
 		(RuleValue[Index][1] == 5 and t_EI[3]) or -- mythic
-		(RuleValue[Index][1] == 6 and t_EI[4]) then -- ascended
+		(RuleValue[Index][1] == 6 and t_EI[4]) or -- ascended
+		(RuleValue[Index][1] == 7 and t_EI[5]) then -- worldforged
 		return true
 	end
 	return false

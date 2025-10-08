@@ -20,6 +20,7 @@ local function processItemFlavorText(item)
 			item.isAscended = flavor:find("Ascended", 1, true) ~= nil
 		end
 	end
+	item.isWorldforged = flavor:find("Worldforged", 1, true) ~= nil
 	local level
 	if item.isMythic then
 		level = flavor:match("Mythic (%d*)")
