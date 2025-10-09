@@ -10,6 +10,7 @@ local PastLoot = LibStub("AceAddon-3.0"):GetAddon("PastLoot")
 ]]
 local function processItemFlavorText(item)
 	local flavor = GetItemFlavorText(item.id)
+	if flavor == nil then print("nil flavor found :"..item.id) return end
 
 	item.isBloodforged = flavor:find("Bloodforged", 1, true) ~= nil
 	item.isHeroic = flavor:find("Heroic", 1, true) ~= nil
@@ -19,6 +20,7 @@ local function processItemFlavorText(item)
 			item.isAscended = flavor:find("Ascended", 1, true) ~= nil
 		end
 	end
+	item.isWorldforged = flavor:find("Worldforged", 1, true) ~= nil
 	local level
 	if item.isMythic then
 		level = flavor:match("Mythic (%d*)")
@@ -55,6 +57,10 @@ function PastLoot:FillContainerItemInfo(item, bag, slot)
 	item.lootable = lootable
 	item.guid = GetContainerItemGUID(bag, slot)
 	item.stackValue = count * (item.vendorPrice or 1)
+	if item.guid then
+		item.canbind = C_Item.CanBind(item.guid) or false
+		item.isbound = C_Item.IsBound(item.guid) or false
+	end
 	return item
 end
 

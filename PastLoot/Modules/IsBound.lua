@@ -8,33 +8,21 @@ Checklist if creating a new module
 - Modify SetMatch and GetMatch
 - Create/Modify local functions as needed
 ]]
-local module_key = "Exceptionaltem"
-local module_name = L["Exceptional Item"]
-local module_tooltip = L["Selected module checks if an item is no longer normal."]
+local module_key = "IsBound"
+local module_name = L["Is Bound"]
+local module_tooltip = L["Selected rule will match whether an item is bound to you."]
 
 local module = PastLoot:NewModule(module_name)
 
 module.Choices = { {
-	["Name"] = L["None"],
+	["Name"] = L["Any"],
 	["Value"] = 1,
 }, {
-	["Name"] = L["Any"],
+	["Name"] = L["Is Bound"],
 	["Value"] = 2,
 }, {
-	["Name"] = L["Bloodforged"],
+	["Name"] = L["Isn't Bound"],
 	["Value"] = 3,
-}, {
-	["Name"] = L["Heroic"],
-	["Value"] = 4,
-}, {
-	["Name"] = L["Mythic"],
-	["Value"] = 5,
-}, {
-	["Name"] = L["Ascended"],
-	["Value"] = 6,
-}, {
-	["Name"] = L["Worldforged"],
-	["Value"] = 7,
 } }
 
 module.ConfigOptions_RuleDefaults = {
@@ -60,7 +48,7 @@ function module:OnDisable()
 end
 
 function module:CreateWidget()
-	local frame_name = "PastLoot_Frames_Widgets_Exceptionaltem"
+	local frame_name = "PastLoot_Frames_Widgets_Wardrobe"
 	return PastLoot:CreateSimpleDropdown(self, module_name, frame_name, module_tooltip)
 end
 
@@ -114,23 +102,22 @@ function module.Widget:SetException(RuleNum, Index, Value)
 end
 
 function module.Widget:SetMatch(itemObj, Tooltip)
-	module.CurrentMatch = { itemObj.isBloodforged, itemObj.isHeroic, itemObj.isMythic, itemObj.isAscended, itemObj.isWorldforged }
-	module:Debug("Exceptionaltem: " .. "true" and itemObj.isBloodforged or "false"
-		.. "," .. "true" and itemObj.isHeroic or "false"
-		.. "," .. "true" and itemObj.isMythic or "false"
-		.. "," .. "true" and itemObj.isAscended or "false" .. " (" .. itemObj.link .. ")")end
+	local IsBound
+	if itemObj.isbound then
+		IsBound = 2
+	else
+		IsBound = 3
+	end
+
+	module.CurrentMatch = IsBound
+	--print("Is Bound: " .. IsBound .. " (" .. tostring(itemObj.isbound) .. ") " .. itemObj.link .. " - " .. itemObj.guid .. " - " .. tostring(C_Item.IsBound(itemObj.guid)))
+	module:Debug("Is Bound: " .. IsBound .. " (" .. tostring(itemObj.isbound) .. ")")
+end
 
 function module.Widget:GetMatch(RuleNum, Index)
 	local RuleValue = self:GetData(RuleNum)
-	local t_EI = module.CurrentMatch
-	local anyTrue = t_EI[1] or t_EI[2] or t_EI[3] or t_EI[4] or t_EI[5]
-	if (RuleValue[Index][1] == 1 and not anyTrue) or -- rule is "None" and item is not exceptional
-		(RuleValue[Index][1] == 2 and anyTrue) or -- rule is "any" and the item is exceptional in some way
-		(RuleValue[Index][1] == 3 and t_EI[1]) or -- bloodforged
-		(RuleValue[Index][1] == 4 and t_EI[2]) or -- heroic
-		(RuleValue[Index][1] == 5 and t_EI[3]) or -- mythic
-		(RuleValue[Index][1] == 6 and t_EI[4]) or -- ascended
-		(RuleValue[Index][1] == 7 and t_EI[5]) then -- worldforged
+	if (RuleValue[Index][1] == 1) or -- rule is "any"
+		(RuleValue[Index][1] > 1 and RuleValue[Index][1] == module.CurrentMatch) then
 		return true
 	end
 	return false
