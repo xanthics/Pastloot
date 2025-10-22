@@ -741,7 +741,8 @@ function PastLoot:UpdateBags(...)
 				["slot"] = data["itemObj"].slot,
 				["clink"] = data["itemObj"].link,
 				["rule"] = data["match"],
-				["rarity"] = data["itemObj"].quality
+				["rarity"] = data["itemObj"].quality,
+				["id"] = data["itemObj"].id
 			}
 		end
 	end
@@ -753,6 +754,11 @@ function PastLoot:UpdateBags(...)
 		local citem = table.remove(deletecache, 1)
 		if citem.guid ~= "" and citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
 			if citem.rarity == 0 or PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete" .. num_to_word[citem.rarity]] then
+				-- try to collect appearances before deleting
+				local appearanceID = C_Appearance.GetItemAppearanceID(citem.id)
+				if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
+					C_AppearanceCollection.CollectItemAppearance(citem.id)
+				end
 				PickupContainerItem(citem.bag, citem.slot)
 				DeleteCursorItem()
 				local StatusMsg = self.db.profile.MessageText.destroy
@@ -861,6 +867,11 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 						sold = c .. itemObj.link
 					end
 					PastLoot:AddLastRoll(guid)
+					-- try to collect appearances before vendoring
+					local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
+					if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
+						C_AppearanceCollection.CollectItemAppearance(itemObj.id)
+					end
 					UseContainerItem(bag, slot)
 				end
 			end
