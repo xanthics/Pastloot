@@ -544,15 +544,6 @@ local function update_sets()
 	end
 end
 
-local function BAG_OPEN(...)
-	-- PastLoot:OpenInventoryGui()
-end
-
-local function BAG_CLOSE(...)
-	if not PastLoot.InventoryGUI then return end
-	PastLoot.InventoryGUI:Hide()
-end
-
 local BUCKET_BAG_UPDATE, BUCKET_PLAYER_LEVEL_UP
 function PastLoot:OnEnable()
 	-- events that may fire multiple times in quick succession and require a cache update, but don't require information from the event
@@ -567,12 +558,6 @@ function PastLoot:OnEnable()
 	-- events that require the event details and also fire with BAG_UPDATE
 	C_Hook:Register(self, "BAG_ITEM_REMOVED, BAG_ITEM_COUNT_CHANGED, BAG_ITEM_REPLACED")
 
-	-- self:SecureHook("OpenAllBags", BAG_OPEN)
-	-- self:SecureHook("OpenBackpack", BAG_OPEN)
-	-- self:SecureHook("CloseAllBags", BAG_CLOSE)
-	-- self:SecureHook("CloseBackpack", BAG_CLOSE)
-	-- self:SecureHook("ToggleBag", "BAG_TOGGLE")
-	-- self:SecureHook("ToggleBackpack", BAG_CLOSE)
 	update_sets()
 	self:SetupModulesOptionsTables() -- Creates Module header frames and lays them out in the scroll frame
 	self:OnProfileChanged()
