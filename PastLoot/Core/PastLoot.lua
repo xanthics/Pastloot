@@ -742,7 +742,7 @@ function PastLoot:UpdateBags(...)
 				-- try to collect appearances before deleting
 				local appearanceID = C_Appearance.GetItemAppearanceID(citem.id)
 				if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
-					C_AppearanceCollection.CollectItemAppearance(citem.id)
+					C_AppearanceCollection.CollectItemAppearance(citem.guid)
 				end
 				PickupContainerItem(citem.bag, citem.slot)
 				DeleteCursorItem()
@@ -855,7 +855,7 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 					-- try to collect appearances before vendoring
 					local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
 					if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
-						C_AppearanceCollection.CollectItemAppearance(itemObj.id)
+						C_AppearanceCollection.CollectItemAppearance(itemObj.guid)
 					end
 					UseContainerItem(bag, slot)
 				end
