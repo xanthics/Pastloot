@@ -648,7 +648,9 @@ local function deleteValidation()
 		local entry = table.remove(validationQue)
 		if entry.guid ~= "" then
 			PastLoot:AddLastRoll(entry.guid, true)
-			PastLoot:Pour(entry.msg)
+			if self.db.profile.ShowDelete then
+				PastLoot:Pour(entry.msg)
+			end
 		end
 	end
 end
