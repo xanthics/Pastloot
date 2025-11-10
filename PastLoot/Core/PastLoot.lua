@@ -27,6 +27,7 @@ local defaults = {
 		["KeepOpen"] = 5,
 		["DeleteVendor"] = false,
 		["ShowDelete"] = true,
+		["LearnWardrobe"] = false,
 		["DeleteCommon"] = false,
 		["DeleteUncommon"] = false,
 		["DeleteRare"] = false,
@@ -337,7 +338,7 @@ PastLoot.OptionsTable = {
 							["type"] = "range",
 							["order"] = 20,
 							["arg"] = { "KeepOpen" },
-							["width"] = "normal",
+							["width"] = "double",
 							["min"] = 0,
 							["max"] = 168,
 							["softMin"] = 0,
@@ -350,7 +351,7 @@ PastLoot.OptionsTable = {
 							["type"] = "toggle",
 							["order"] = 30,
 							["arg"] = { "DeleteVendor" },
-							["width"] = "full",
+							["width"] = "normal",
 						},
 						["ShowDelete"] = {
 							["name"] = L["ShowDelete"], --L["Skip Warning"],
@@ -358,7 +359,15 @@ PastLoot.OptionsTable = {
 							["type"] = "toggle",
 							["order"] = 40,
 							["arg"] = { "ShowDelete" },
-							["width"] = "full",
+							["width"] = "normal",
+						},
+						["LearnWardrobe"] = {
+							["name"] = L["LearnWardrobe"], --L["Skip Warning"],
+							["desc"] = L["LearnWardrobeDesc"],
+							["type"] = "toggle",
+							["order"] = 45,
+							["arg"] = { "LearnWardrobe" },
+							["width"] = "normal",
 						},
 						["ConfirmDelete"] = {
 							["name"] = L["Automatically Confirm Delete"], --L["Options"],
@@ -740,9 +749,11 @@ function PastLoot:UpdateBags(...)
 		if citem.guid ~= "" and citem.guid == GetContainerItemGUID(citem.bag, citem.slot) then
 			if citem.rarity == 0 or PastLoot.PASTLOOT_CONFIRMED_ITEM_CHOICES[citem.clink] == true or self.db.profile["Delete" .. num_to_word[citem.rarity]] then
 				-- try to collect appearances before deleting
-				local appearanceID = C_Appearance.GetItemAppearanceID(citem.id)
-				if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
-					C_AppearanceCollection.CollectItemAppearance(citem.guid)
+				if self.db.profile.LearnWardrobe then
+					local appearanceID = C_Appearance.GetItemAppearanceID(citem.id)
+					if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
+						C_AppearanceCollection.CollectItemAppearance(citem.guid)
+					end
 				end
 				PickupContainerItem(citem.bag, citem.slot)
 				DeleteCursorItem()
@@ -853,9 +864,11 @@ function PastLoot:MERCHANT_SHOW(Event, ...)
 					end
 					PastLoot:AddLastRoll(guid)
 					-- try to collect appearances before vendoring
-					local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
-					if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
-						C_AppearanceCollection.CollectItemAppearance(itemObj.guid)
+					if self.db.profile.LearnWardrobe then
+						local appearanceID = C_Appearance.GetItemAppearanceID(itemObj.id)
+						if appearanceID and not C_AppearanceCollection.IsAppearanceCollected(appearanceID) then
+							C_AppearanceCollection.CollectItemAppearance(itemObj.guid)
+						end
 					end
 					UseContainerItem(bag, slot)
 				end
