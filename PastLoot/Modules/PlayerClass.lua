@@ -18,6 +18,9 @@ module.Choices = { {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["HERO"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["HERO"] .. "|r", -- Hero
 	["Value"] = "HERO",
 }, {
+	["Name"] = "|c" .. RAID_CLASS_COLORS["DRUID"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["DRUID"] .. "|r", -- Druid
+	["Value"] = "DRUID",
+}, {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["HUNTER"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["HUNTER"] .. "|r", -- Hunter
 	["Value"] = "HUNTER",
 }, {
@@ -29,9 +32,6 @@ module.Choices = { {
 }, {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["PRIEST"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["PRIEST"] .. "|r", -- Priest
 	["Value"] = "PRIEST",
-}, {
-	["Name"] = "|c" .. RAID_CLASS_COLORS["RANGER"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["RANGER"] .. "|r", -- Ranger
-	["Value"] = "RANGER",
 }, {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["ROGUE"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["ROGUE"] .. "|r", -- Rogue
 	["Value"] = "ROGUE",
@@ -60,9 +60,6 @@ module.Choices = { {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["DEMONHUNTER"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["DEMONHUNTER"] .. "|r", -- Felsworn
 	["Value"] = "DEMONHUNTER",
 }, {
-	["Name"] = "|c" .. RAID_CLASS_COLORS["DRUID"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["DRUID"] .. "|r", -- Druid
-	["Value"] = "DRUID",
-}, {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["FLESHWARDEN"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["FLESHWARDEN"] .. "|r", -- Knight of Xoroth
 	["Value"] = "FLESHWARDEN",
 }, {
@@ -80,6 +77,9 @@ module.Choices = { {
 }, {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["PYROMANCER"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["PYROMANCER"] .. "|r", -- Pyromancer
 	["Value"] = "PYROMANCER",
+}, {
+	["Name"] = "|c" .. RAID_CLASS_COLORS["RANGER"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["RANGER"] .. "|r", -- Ranger
+	["Value"] = "RANGER",
 }, {
 	["Name"] = "|c" .. RAID_CLASS_COLORS["REAPER"].colorStr .. LOCALIZED_CLASS_NAMES_MALE["REAPER"] .. "|r", -- Reaper
 	["Value"] = "REAPER",
