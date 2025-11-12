@@ -258,3 +258,5 @@ L["Cannot Bind"] = true
 L["Is Bound"] = true
 L["Selected rule will match whether an item is bound to you."] = true
 L["Isn't Bound"] = true
+L["Player Class"] = true
+L["Selected rule will match against the player's class."] = true
