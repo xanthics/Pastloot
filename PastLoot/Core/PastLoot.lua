@@ -946,7 +946,9 @@ function PastLoot:EvaluateItem(itemObj)
 						MatchedRule = false
 						break
 					end
-				end -- NumFilters > 0
+				else
+					MatchedRule = false
+				end
 			end -- Each Widget
 
 			if (MatchedRule) then
